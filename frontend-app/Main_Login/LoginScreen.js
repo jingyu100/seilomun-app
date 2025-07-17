@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import styles from '../Style/LoginStyle';
+import styles from '../consumer/Style/LoginStyle';
 
 const LoginScreen = ({ navigation }) => {
   return (
