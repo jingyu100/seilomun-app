@@ -6,7 +6,8 @@ import styles from './LoginStyle';
 const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <Image source={require('../../Image/spLogo.png')} style={styles.logo} />
+    <Image source={require('../consumer/Image/spLogo.png')} style={styles.logo} />
+
 
       <Text style={styles.slogan}>
         “환경을 살리는 알뜰 쇼핑 플랫폼”
