@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import api, { API_BASE_URL } from "../api/config";
+// import api, { API_BASE_URL } from "../api/config";
 
 export default function useStoreInfo() {
   const route = useRoute();
