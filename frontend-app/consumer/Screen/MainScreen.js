@@ -24,8 +24,10 @@ export default function MainScreen() {
       <ScrollView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Ionicons name="menu" size={24} />
-          <Text style={styles.headerText}>내 집1 ▼</Text>
+          <View style={styles.headerLeft}>
+            <Ionicons name="menu" size={24} style={{ marginRight: 8 }} />
+            <Text style={styles.headerText}>내 집1 ▼</Text>
+          </View>
           <View style={styles.headerIcons}>
             <Ionicons
               name="notifications-outline"
@@ -37,7 +39,15 @@ export default function MainScreen() {
         </View>
 
         {/* Search */}
-        <TextInput placeholder="검색" style={styles.searchBar} />
+        <View style={styles.searchBar}>
+          <Ionicons
+            name="search-outline"
+            size={20}
+            color="gray"
+            style={{ marginRight: 8 }}
+          />
+          <TextInput placeholder="검색" style={{ flex: 1 }} />
+        </View>
 
         {/* Categories */}
         <View style={styles.categories}>
@@ -71,7 +81,7 @@ export default function MainScreen() {
       <View style={styles.bottomTab}>
         <TabItem icon="document-text-outline" label="주문내역" />
         <TabItem icon="chatbubble-outline" label="채팅" />
-        <TabItem icon="home" label="홈" focused />
+        <TabItem icon="home-sharp" label="홈" focused />
         <TabItem icon="heart-outline" label="즐겨찾기" />
         <TabItem icon="person-outline" label="마이페이지" />
       </View>
@@ -96,14 +106,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 16,
   },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   headerText: { fontSize: 18, fontWeight: "bold" },
   headerIcons: { flexDirection: "row" },
-  searchBar: { backgroundColor: "#eee", padding: 10, borderRadius: 8, marginBottom: 16 },
+  searchBar: {
+    marginTop: 30,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#eee",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
   categories: { flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
   category: { alignItems: "center" },
   eventBox: {
     backgroundColor: "#eee",
     padding: 20,
+    height: 200,
     borderRadius: 8,
     position: "relative",
     marginBottom: 16,
@@ -112,6 +135,8 @@ const styles = StyleSheet.create({
   recommendationTitle: { fontWeight: "bold", marginBottom: 8 },
   products: { flexDirection: "row", justifyContent: "space-between" },
   productBox: {
+    height: 170,
+    width: 100,
     flex: 1,
     backgroundColor: "#eee",
     padding: 20,
@@ -120,10 +145,10 @@ const styles = StyleSheet.create({
   },
   bottomTab: {
     flexDirection: "row",
-    justifyContent: "space-around",
     paddingVertical: 8,
     borderTopWidth: 1,
     borderColor: "#ccc",
+    backgroundColor: "#fff",
   },
-  tabItem: { alignItems: "center" },
+  tabItem: { width: "20%", alignItems: "center", justifyContent: "center" },
 });
