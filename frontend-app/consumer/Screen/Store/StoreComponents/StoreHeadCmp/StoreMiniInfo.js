@@ -19,7 +19,7 @@ export default function StoreMiniInfo({
             style={styles.RatingBtn}
             onPress={() => navigation.navigate('ConsumerLogin')}
         >
-            <Image source={require('../../../../Image/starIcon.png')} />
+            <Image source={require('../../../../../assets/starIcon.png')} />
             <Text>{rating}</Text>
         </TouchableOpacity>
         <Text>{address}, {addressDetail}</Text>

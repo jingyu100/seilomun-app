@@ -14,7 +14,7 @@ export default function StoreScreen() {
             <Image source={
                     storeImages
                     ? { uri: storeImages }
-                    : require('../../image/noImage.jpg')
+                    : require('../../../assets/noImage.jpg')
                  } 
                  style={styles.storeImage} />
             <View>
