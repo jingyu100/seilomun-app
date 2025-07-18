@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
-
+import styles from "../../\bStoreStyle";
 
 export default function StoreMiniInfo({ 
     rating, 

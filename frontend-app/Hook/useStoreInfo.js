@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRoute, useNavigation } from "@react-navigation/native";
-// import api, { API_BASE_URL } from "../api/config";
+// import api from "../api/config";
+import { Alert } from "react-native";
 
 export default function useStoreInfo() {
   const route = useRoute();
@@ -9,7 +10,10 @@ export default function useStoreInfo() {
   const [store, setStore] = useState(null);
 
   useEffect(() => {
-    if (!sellerId) return;
+    if (!sellerId) {
+      console.warn("sellerId 없음");
+      return;
+    }
 
     const storeInfo = async () => {
       try {
@@ -42,9 +46,9 @@ export default function useStoreInfo() {
           }
         }
 
-        // 기본 이미지 (URL 또는 require)
+        // 기본 이미지 (local)
         if (sellerPhotoUrls.length === 0) {
-          sellerPhotoUrls = [require('../assets/noImage.jpg')];;
+          sellerPhotoUrls = ["local"]; // 나중에 분기처리용
         }
 
         setStore({
@@ -57,7 +61,12 @@ export default function useStoreInfo() {
         });
       } catch (error) {
         console.error("API 요청 실패:", error);
-        navigation.replace("NotFoundScreen");
+        Alert.alert("오류", "판매자 정보를 불러오는 데 실패했습니다.");
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.replace("NotFoundScreen");
+        }
       }
     };
 

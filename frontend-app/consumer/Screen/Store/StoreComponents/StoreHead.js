@@ -7,6 +7,7 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
+import styles from '../\bStoreStyle';
 import StoreMiniInfo from './StoreHeadCmp/StoreMiniInfo';
 
 export default function StoreHead({ store, sellerId, onOpenChat }) {
