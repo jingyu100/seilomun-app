@@ -1,111 +1,196 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Animated,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
+import StoreMiniInfo from './StoreHeadCmp/StoreMiniInfo';
 
 export default function StoreHead({ store, sellerId, onOpenChat }) {
-    
+  
     if (!store) return null;
 
     const { sellerInformationDto } = store;
+    const { width: screenWidth } = useWindowDimensions();
+    const [activeTab, setActiveTab] = useState('menu');
+    const [tabLayouts, setTabLayouts] = useState({});
+    const underlineLeft = useRef(new Animated.Value(0)).current;
+    const underlineWidth = useRef(new Animated.Value(0)).current;
 
-    // 상품, 매장 정보, 리뷰 탭 부분
-    const [activeTab, setActiveTab] = useState("menu");
-
-    const tabRefs = {
-        menu: useRef(null),
-        info: useRef(null),
-        review: useRef(null),
-      };
-    
-      const underlineRef = useRef(null);
-    
-      useEffect(() => {
-        const updateUnderline = () => {
-          const current = tabRefs[activeTab]?.current;
-          const underline = underlineRef.current;
-    
-          if (current && underline) {
-            underline.style.left = `${current.offsetLeft}px`;
-            underline.style.width = `${current.offsetWidth}px`;
-          }
-        };
-    
-        updateUnderline();
-        window.addEventListener("resize", updateUnderline);
-    
-        return () => {
-          window.removeEventListener("resize", updateUnderline);
-        };
-      }, [activeTab]);
-    
-      const tabs = [
-        { key: "menu", label: "메뉴", content: <StoreMenu /> },
+    const tabs = [
+        { key: 'menu', label: '메뉴', content: <StoreMenu /> },
         {
-          key: "info",
-          label: "정보",
-          content: (
+        key: 'info',
+        label: '정보',
+        content: (
             <StoreMainInfo
-              address={sellerInformationDto?.postCode || "가게 주소 없음"}
-              addressDetail={sellerInformationDto?.address || "가게 상세 주소 없음"}
-              phone={sellerInformationDto?.phone || "연락처 없음"}
-              operatingHours={sellerInformationDto?.operatingHours || "운영 시간 정보 없음"}
-              storeDescription={sellerInformationDto?.storeDescription || "설명 없음"}
+            address={sellerInformationDto?.postCode || '가게 주소 없음'}
+            addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
+            phone={sellerInformationDto?.phone || '연락처 없음'}
+            operatingHours={sellerInformationDto?.operatingHours || '운영 시간 정보 없음'}
+            storeDescription={sellerInformationDto?.storeDescription || '설명 없음'}
             />
-          ),
+        ),
         },
         {
-          key: "review",
-          label: "리뷰",
-          content: (
-            <div>
-              <StoreReview />
-            </div>
-          ),
+        key: 'review',
+        label: '리뷰',
+        content: (
+            <View>
+                <StoreReview />
+            </View>
+        ),
         },
-      ];
+    ];
+
+    const handleLayout = (key, event) => {
+        const { x, width } = event.nativeEvent.layout;
+        setTabLayouts((prev) => {
+        const next = { ...prev, [key]: { x, width } };
+        if (key === activeTab) {
+            underlineLeft.setValue(x);
+            underlineWidth.setValue(width);
+        }
+        return next;
+        });
+    };
+
+    const handleTabPress = (key) => {
+        setActiveTab(key);
+        const layout = tabLayouts[key];
+        if (layout) {
+        Animated.timing(underlineLeft, {
+            toValue: layout.x,
+            duration: 200,
+            useNativeDriver: false,
+        }).start();
+        Animated.timing(underlineWidth, {
+            toValue: layout.width,
+            duration: 200,
+            useNativeDriver: false,
+        }).start();
+        }
+    };
 
     return (
         <View style={styles.storeHead}>
-            <View style={styles.storeHead_Top}>
-                <View style={styles.storeHead_left}>
-                    <Text style={styles.storeTitle}>
-                        {sellerInformationDto?.storeName || "상호 없음"}
-                    </Text>
-                    <StoreMiniInfo
-                        rating= {sellerInformationDto?.rating || "0.0"}
-                        address={sellerInformationDto?.postCode || "가게 주소 없음"}
-                        addressDetail={sellerInformationDto?.address || "가게 상세 주소 없음"}
-                        phone={sellerInformationDto?.phone || "전화번호 없음"}
-                        minOrderAmount={sellerInformationDto?.minOrderAmount || "배달 없음"}
-                        deliveryFees={
-                            (sellerInformationDto?.deliveryFeeDtos || [])
-                            .filter(fee => fee.deleted === false)
-                            .sort((a, b) => a.ordersMoney - b.ordersMoney)
-                        }
-                    />
-                </View>
-                <View style={styles.storeHead_right}>
-                    {/* <Inquiry sellerId={sellerId} onOpenChat={onOpenChat} />
-                    <FavoriteButtonBox sellerId={sellerId} /> */}
-                </View>
+        <View style={styles.storeHead_Top}>
+            <View style={styles.storeHead_left}>
+            <Text style={styles.storeTitle}>
+                {sellerInformationDto?.storeName || '상호 없음'}
+            </Text>
+            <StoreMiniInfo
+                rating={sellerInformationDto?.rating || '0.0'}
+                address={sellerInformationDto?.postCode || '가게 주소 없음'}
+                addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
+                phone={sellerInformationDto?.phone || '전화번호 없음'}
+                minOrderAmount={sellerInformationDto?.minOrderAmount || '배달 없음'}
+                deliveryFees={
+                (sellerInformationDto?.deliveryFeeDtos || [])
+                    .filter((fee) => fee.deleted === false)
+                    .sort((a, b) => a.ordersMoney - b.ordersMoney)
+                }
+                // 리뷰 태그로 이동
+                onGoToReviewTab={() => handleTabPress('review')}
+            />
             </View>
-
-            <View style={styles.storeHead_bottom}>
-                <View ref={underlineRef} style={styles.underline} />
-                    {tabs.map(({ key, label }) => (
-                        <TouchableOpacity
-                            key={key}
-                            ref={tabRefs[key]}
-                            style={[
-                                styles.storeTabItem,
-                                activeTab === key && styles.activeTabItem,
-                            ]}
-                            onPress={() => setActiveTab(key)}
-                        >
-                            <Text>{label}</Text>
-                        </TouchableOpacity>
-                    ))}
-
-                <View>{tabs.find((tab) => tab.key === activeTab)?.content}</View>
+            <View style={styles.storeHead_right}>
+            {/* <Inquiry sellerId={sellerId} onOpenChat={onOpenChat} />
+            <FavoriteButtonBox sellerId={sellerId} /> */}
             </View>
         </View>
-    )
-}
+
+        {/* 탭 영역 */}
+        <View style={styles.storeHead_bottom}>
+            <View style={styles.tabUI}>
+            {tabs.map(({ key, label }) => (
+                <TouchableOpacity
+                key={key}
+                onLayout={(e) => handleLayout(key, e)}
+                onPress={() => handleTabPress(key)}
+                style={styles.storeTabItem}
+                >
+                <Text
+                    style={[
+                    styles.tabText,
+                    activeTab === key && styles.activeTabText,
+                    ]}
+                >
+                    {label}
+                </Text>
+                </TouchableOpacity>
+            ))}
+            <Animated.View
+                style={[
+                styles.underline,
+                {
+                    left: underlineLeft,
+                    width: underlineWidth,
+                },
+                ]}
+            />
+            </View>
+
+            {/* 탭 콘텐츠 */}
+            <View style={styles.tabContent}>
+            {tabs.find((tab) => tab.key === activeTab)?.content}
+            </View>
+        </View>
+        </View>
+    );
+    }
+
+    const styles = StyleSheet.create({
+    storeHead: {
+        flex: 1,
+    },
+    storeHead_Top: {
+        padding: 16,
+    },
+    storeHead_left: {
+        flex: 1,
+    },
+    storeHead_right: {
+        justifyContent: 'center',
+    },
+    storeTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    storeHead_bottom: {
+        paddingTop: 16,
+    },
+    tabUI: {
+        flexDirection: 'row',
+        position: 'relative',
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    storeTabItem: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+    },
+    tabText: {
+        fontSize: 16,
+        color: '#666',
+    },
+    activeTabText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#000',
+    },
+    underline: {
+        position: 'absolute',
+        bottom: 0,
+        height: 2,
+        backgroundColor: 'black',
+    },
+    tabContent: {
+        padding: 16,
+    },
+});

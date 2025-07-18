@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import api, { API_BASE_URL } from "../api/config";
 
 export default function useStoreInfo() {
-  const { sellerId } = useParams();
-  const navigate = useNavigate();
+  const route = useRoute();
+  const navigation = useNavigation();
+  const sellerId = route.params?.sellerId;
   const [store, setStore] = useState(null);
 
   useEffect(() => {
@@ -16,13 +17,13 @@ export default function useStoreInfo() {
         console.log("API 응답:", response.data);
 
         const sellerInformationDto = response.data.data.seller;
-        console.log(sellerInformationDto);
+
         if (!sellerInformationDto) {
-          navigate("/404", { replace: true });
+          console.warn("판매자 정보 없음");
           return;
         }
 
-        //이미지 URL 생성
+        // 이미지 URL 처리
         let sellerPhotoUrls = [];
 
         if (
@@ -41,12 +42,11 @@ export default function useStoreInfo() {
           }
         }
 
-        // sellerPhotoUrls가 여전히 비어 있으면 기본 이미지 적용
+        // 기본 이미지 (URL 또는 require)
         if (sellerPhotoUrls.length === 0) {
-          sellerPhotoUrls = ["/image/product1.jpg"];
+          sellerPhotoUrls = [require('../assets/noImage.jpg')];;
         }
 
-        // 최종 setStore
         setStore({
           sellerInformationDto: {
             ...sellerInformationDto,
@@ -57,14 +57,12 @@ export default function useStoreInfo() {
         });
       } catch (error) {
         console.error("API 요청 실패:", error);
-        navigate("/404", { replace: true });
+        navigation.replace("NotFoundScreen");
       }
     };
 
     storeInfo();
-  }, [sellerId, navigate]);
+  }, [sellerId]);
 
   return { store, sellerId };
-
-  // const { sellerRegisterDto, sellerInformationDto, sellerPhotoDto } = store;
 }

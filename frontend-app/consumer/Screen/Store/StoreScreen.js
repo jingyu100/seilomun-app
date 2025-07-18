@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import { useStoreInfo } from "../../../Hook/useStoreInfo.js";
 import StoreHead from "./StoreComponents/StoreHead.js";
 
@@ -12,10 +12,10 @@ export default function StoreScreen() {
     return (
         <View>
             <Image source={
-                    storeImages
-                    ? { uri: storeImages }
-                    : require('../../../assets/noImage.jpg')
-                 } 
+                    storeImages && storeImages.length > 0
+                        ? { uri: storeImages[0] }
+                        : require('../../../assets/noImage.jpg')
+                }
                  style={styles.storeImage} />
             <View>
                 <View style={styles.storeMargin}>
