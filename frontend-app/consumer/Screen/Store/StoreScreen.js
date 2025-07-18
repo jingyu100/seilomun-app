@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { useStoreInfo } from "../../../Hook/useStoreInfo.js";
-import StoreHead from "StoreComponents/StoreHead.js";
+import StoreHead from "/StoreComponents/StoreHead.js";
 
 export default function StoreScreen() {
     const { store, sellerId } = useStoreInfo();
