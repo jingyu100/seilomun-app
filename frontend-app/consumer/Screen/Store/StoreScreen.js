@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
-import { useStoreInfo } from "../../../Hook/useStoreInfo.js";
+import useStoreInfo from "../../../Hook/useStoreInfo.js";
 import StoreHead from "./StoreComponents/StoreHead.js";
 
 export default function StoreScreen() {

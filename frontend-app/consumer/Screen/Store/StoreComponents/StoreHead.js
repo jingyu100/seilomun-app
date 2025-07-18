@@ -27,11 +27,11 @@ export default function StoreHead({ store, sellerId, onOpenChat }) {
         label: '정보',
         content: (
             <StoreMainInfo
-            address={sellerInformationDto?.postCode || '가게 주소 없음'}
-            addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
-            phone={sellerInformationDto?.phone || '연락처 없음'}
-            operatingHours={sellerInformationDto?.operatingHours || '운영 시간 정보 없음'}
-            storeDescription={sellerInformationDto?.storeDescription || '설명 없음'}
+                address={sellerInformationDto?.postCode || '가게 주소 없음'}
+                addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
+                phone={sellerInformationDto?.phone || '연락처 없음'}
+                operatingHours={sellerInformationDto?.operatingHours || '운영 시간 정보 없음'}
+                storeDescription={sellerInformationDto?.storeDescription || '설명 없음'}
             />
         ),
         },
