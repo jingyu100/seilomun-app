@@ -1,14 +1,9 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, ScrollView, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Header from "../Screen/Header/Header";
+import BottomTab from "../Screen/BottomTab/BottomTab";
 
 export default function MainScreen() {
   const categories = [
@@ -16,27 +11,12 @@ export default function MainScreen() {
     { icon: "cafe-outline", label: "빵집" },
     { icon: "cart-outline", label: "마트" },
     { icon: "restaurant-outline", label: "식당" },
-    { icon: "ellipsis-horizontal", label: "더보기" },
   ];
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
       <ScrollView style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Ionicons name="menu" size={24} style={{ marginRight: 8 }} />
-            <Text style={styles.headerText}>내 집1 ▼</Text>
-          </View>
-          <View style={styles.headerIcons}>
-            <Ionicons
-              name="notifications-outline"
-              size={24}
-              style={{ marginRight: 10 }}
-            />
-            <Ionicons name="cart-outline" size={24} />
-          </View>
-        </View>
+        <Header />
 
         {/* Search */}
         <View style={styles.searchBar}>
@@ -77,41 +57,13 @@ export default function MainScreen() {
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomTab}>
-        <TabItem icon="document-text-outline" label="주문내역" />
-        <TabItem icon="chatbubble-outline" label="채팅" />
-        <TabItem icon="home-sharp" label="홈" focused />
-        <TabItem icon="heart-outline" label="즐겨찾기" />
-        <TabItem icon="person-outline" label="마이페이지" />
-      </View>
+      <BottomTab />
     </SafeAreaView>
-  );
-}
-
-function TabItem({ icon, label, focused }) {
-  return (
-    <TouchableOpacity style={styles.tabItem}>
-      <Ionicons name={icon} size={24} color={focused ? "black" : "gray"} />
-      <Text style={{ color: focused ? "black" : "gray" }}>{label}</Text>
-    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16 },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 16,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerText: { fontSize: 18, fontWeight: "bold" },
-  headerIcons: { flexDirection: "row" },
   searchBar: {
     marginTop: 30,
     flexDirection: "row",
@@ -121,7 +73,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 16,
   },
-  categories: { flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
+  categories: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
   category: { alignItems: "center" },
   eventBox: {
     backgroundColor: "#eee",
@@ -143,12 +99,4 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginRight: 8,
   },
-  bottomTab: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-  },
-  tabItem: { width: "20%", alignItems: "center", justifyContent: "center" },
 });
