@@ -21,7 +21,7 @@ export default function StoreMiniInfo({
     <View>
         <TouchableOpacity
             style={styles.ratingBtn}
-            onPress={() => navigation.navigate('CustomerLogin')}
+            onPress={onGoToReviewTab}
         >
             <Image
                 style={styles.ratingImg} 
