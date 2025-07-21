@@ -1,30 +1,21 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import { StatusBar } from "expo-status-bar";
+import React from "react";
 
-import LoginScreen from './Main_Login/LoginScreen';
-import StoreScreen from './consumer/Screen/Store/StoreScreen';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+import LoginScreen from "./Main_Login/LoginScreen";
+import MainScreen from "./consumer/Screen/MainScreen";
 
 const Stack = createNativeStackNavigator();
 
-const linking = {
-  prefixes: ['http://localhost:8081'], // 웹 서버 주소로 변경
-  config: {
-    screens: {
-      Login: 'Login',
-      Store: 'Store',
-    },
-  },
-};
-
+// 개발중인 화면 보고싶으면 initialRouteName 값 개발중인 화면 name으로 바꾸면 됨
 export default function App() {
   return (
-    <NavigationContainer linking={linking}>
-      <StatusBar style="auto" />
-      <Stack.Navigator initialRouteName="Store">
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Main" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Store" component={StoreScreen} />
+        <Stack.Screen name="Main" component={MainScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
