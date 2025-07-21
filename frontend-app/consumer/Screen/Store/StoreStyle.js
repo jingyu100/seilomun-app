@@ -2,51 +2,94 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   storeMargin: {
-    margin: 10,
+    marginTop: 12,
+    marginHorizontal: 15,
   },
   container: {
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'blue',
+    width: 'auto',
+    height: 'auto',
     overflow: 'scroll',
+    flex: 1,
   },
   storeImage: {
-    // position: 'absolute',
+    position: 'absolute',
     top: 0,
-    left: 0,
     width: '100%',
-    height: 320,
+    height: 250,
+  },
+  storeUI: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    paddingTop: 100,
+    zIndex: 100,
   },
   storeHead: {
-    position: 'relative',
     backgroundColor: '#fff',
     flex: 1,
-    width: '100%',
-    // height: 400,
-    zIndex: 100,
   },
   storeHead_Top: {
     display: 'flex',
-
+    flexDirection: 'row',
   },
   storeHead_left: {
-    display: 'flex',
     flexDirection: 'column',
-    flex: 1,
-
+    width: '85%',
   },
   storeHead_right: {
-
+    // width: 50,
+    marginLeft: 'auto',
   },
   storeTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
+    overflow: 'hidden',
   },
+
+  // StoreMiniInfo 부분
+  ratingBtn: {
+    flexDirection: 'row',
+    width: '100%',
+    marginBottom: 8,
+    alignContent: 'center',
+    alignItems: 'center',
+  },
+  ratingImg: {
+    width: 18,
+    height: 18,
+    marginRight: 2.5,
+  },
+  ratingTxt: {
+    fontSize: 13.5,
+    fontWeight: 'bold',
+  },
+  address: {
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  deliveryTip: {
+    flexDirection: 'row',
+    marginTop: 5,
+  },
+
   storeHead_bottom: {
     paddingTop: 16,
   },
+
+  // 가게 즐겨찾기
+  tabItem: {
+    // left: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+
+  // 가게 메뉴, 정보, 리뷰 탭 부분
   tabUI: {
       flexDirection: 'row',
       position: 'relative',
@@ -76,6 +119,22 @@ const styles = StyleSheet.create({
   tabContent: {
       padding: 16,
   },
+
+  // 가게 바디 부분
+  storeBody: {
+
+  },
+
+  // StoreMainInfo 부분
+  storeMainInfo: {
+    // flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    /* justifyContent: 'center', */
+    width: '100%',
+    paddingTop: 35,
+    paddingBottom: 20,
+  }
 });
 
 export default styles;

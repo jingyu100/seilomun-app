@@ -10,6 +10,7 @@ export default function Header() {
         justifyContent: "space-between",
         alignItems: "center",
         paddingVertical: 16,
+        zIndex: 1000,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>

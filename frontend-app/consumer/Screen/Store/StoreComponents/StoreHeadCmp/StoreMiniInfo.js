@@ -15,25 +15,32 @@ export default function StoreMiniInfo({
     //     .filter((fee) => fee.deleted === false)
     //     .sort((a, b) => a.ordersMoney - b.ordersMoney);
 
+    // const ratingLength= 
+
     return (
         <View>
-            <Text>
-                {/* {address}, {addressDetail} */}
-            </Text>
             <TouchableOpacity
-                style={styles.RatingBtn}
+                style={styles.ratingBtn}
                 onPress={onGoToReviewTab}
             >
-                <Image source={require('../../../../../assets/starIcon.png')} />
-                <Text>
+                <Image
+                    style={styles.ratingImg} 
+                    source={require('../../../../../assets/starIcon.png')} 
+                />
+                <Text style={styles.ratingTxt}>
                     {/* {rating} */}
+                    4.7(492)
                 </Text>
             </TouchableOpacity>
+            <Text style={styles.address}>
+                {/* {address}, {addressDetail} */}
+                대구광역시 북구 복현로 35, 3층 본관 300호
+            </Text>
             <View>
                 <Text>배달 주문 금액</Text>
                 {/* {validDeliveryFees.length > 0 ? (
                     validDeliveryFees.map((fee, idx) => (
-                        <View key={idx}>
+                        <View key={idx} style={styles.deliveryTip}>
                             <Text>{fee.ordersMoney.toLocaleString()}원 이상 </Text>
                             <Text>{fee.deliveryTip.toLocaleString()}원</Text>
                         </View>
@@ -41,7 +48,10 @@ export default function StoreMiniInfo({
                     ) : (
                     <Text>배달 없음</Text>
                 )} */}
-                <Text>배달 없음</Text>
+                <View style={styles.deliveryTip}>
+                    <Text>14,000원 이상  </Text>
+                    <Text>1,000원</Text>
+                </View>
             </View>
         </View>
     )

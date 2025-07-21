@@ -25,9 +25,11 @@ const styles = StyleSheet.create({
   bottomTab: {
     flexDirection: "row",
     paddingVertical: 8,
+    paddingHorizontal: 16,
     borderTopWidth: 1,
     borderColor: "#ccc",
     backgroundColor: "#fff",
+    zIndex: 1000,
   },
   tabItem: {
     width: "20%",

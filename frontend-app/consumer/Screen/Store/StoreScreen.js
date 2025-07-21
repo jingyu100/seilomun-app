@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import useStoreInfo from "../../../Hook/useStoreInfo.js";
 import styles from './StoreStyle.js';
+import Header from '../Header/Header.js';
+import BottomTab from '../BottomTab/BottomTab.js';
 import StoreHead from "./StoreComponents/StoreHead.js";
 
 export default function StoreScreen() {
@@ -12,6 +14,7 @@ export default function StoreScreen() {
 
     return (
         <View style={styles.container}>
+            <Header />
             {/* <Image 
                 source={
                     storeImages && storeImages.length > 0
@@ -27,20 +30,24 @@ export default function StoreScreen() {
                 resizeMode="cover" // object-fit: cover 대체용
             />
                  
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 60 }}>
-                <View style={styles.storeMargin}>
-                    <StoreHead
-                        testID='storeHead'
-                        // store={store}
-                        // sellerId={sellerId}
-                        // onOpenChat={handleOpenChat}
-                    />
-                </View>
+            <ScrollView style={styles.storeUI}>
+                <View style={{ backgroundColor: '#fff', }}>
+                    <View style={styles.storeMargin}>
+                        <StoreHead
+                            testID='storeHead'
+                            // store={store}
+                            // sellerId={sellerId}
+                            // onOpenChat={handleOpenChat}
+                        />
 
-                <View testID="storeBdoy">
-                    {/* 여기에 리뷰, 기타 내용이 추가되면 다 보여짐 */}
+
+                        <View testID="storeBdoy">
+                            {/* 여기에 리뷰, 기타 내용이 추가되면 다 보여짐 */}
+                        </View>
+                    </View>
                 </View>
             </ScrollView>
+            <BottomTab />
         </View>
     )
 }

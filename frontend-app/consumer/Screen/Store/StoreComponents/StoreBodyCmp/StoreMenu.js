@@ -4,7 +4,9 @@ import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 export default function StoreMenu() {
     return(
         <View>
-            메뉴
+            <Text>
+                메뉴
+            </Text>
         </View>
     )
 }

@@ -9,9 +9,11 @@ import {
 } from 'react-native';
 import styles from '../StoreStyle.js';
 import StoreMiniInfo from './StoreHeadCmp/StoreMiniInfo';
-import StoreMenu from './StoreBody/StoreMenu.js';
-import StoreMainInfo from './StoreBody/StoreMainInfo.js';
-import StoreReview from './StoreBody/StoreReview.js';
+import StoreMenu from './StoreBodyCmp/StoreMenu.js';
+import StoreMainInfo from './StoreBodyCmp/StoreMainInfo.js';
+import StoreReview from './StoreBodyCmp/StoreReview.js';
+import FavoriteButtonBox from './StoreHeadCmp/FavoriteButtonBox.js';
+import Inquiry from './StoreHeadCmp/Inquriy.js';
 
 export default function StoreHead(
     // { store, sellerId, onOpenChat }
@@ -29,26 +31,26 @@ export default function StoreHead(
     const tabs = [
         { key: 'menu', label: '메뉴', content: <StoreMenu /> },
         {
-        key: 'info',
-        label: '정보',
-        content: (
-            <StoreMainInfo
-                // address={sellerInformationDto?.postCode || '가게 주소 없음'}
-                // addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
-                // phone={sellerInformationDto?.phone || '연락처 없음'}
-                // operatingHours={sellerInformationDto?.operatingHours || '운영 시간 정보 없음'}
-                // storeDescription={sellerInformationDto?.storeDescription || '설명 없음'}
-            />
-        ),
+            key: 'info',
+            label: '정보',
+            content: (
+                <StoreMainInfo
+                    // address={sellerInformationDto?.postCode || '가게 주소 없음'}
+                    // addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
+                    // phone={sellerInformationDto?.phone || '연락처 없음'}
+                    // operatingHours={sellerInformationDto?.operatingHours || '운영 시간 정보 없음'}
+                    // storeDescription={sellerInformationDto?.storeDescription || '설명 없음'}
+                />
+            ),
         },
         {
-        key: 'review',
-        label: '리뷰',
-        content: (
-            <View>
-                <StoreReview />
-            </View>
-        ),
+            key: 'review',
+            label: '리뷰',
+            content: (
+                <View>
+                    <StoreReview />
+                </View>
+            ),
         },
     ];
 
@@ -106,8 +108,10 @@ export default function StoreHead(
                     />
                 </View>
                     <View style={styles.storeHead_right}>
-                    {/* <Inquiry sellerId={sellerId} onOpenChat={onOpenChat} />
-                    <FavoriteButtonBox sellerId={sellerId} /> */}
+                        {/* <Inquiry sellerId={sellerId} onOpenChat={onOpenChat} />
+                        <FavoriteButtonBox sellerId={sellerId} /> */}
+                        <FavoriteButtonBox />
+                        <Inquiry />
                     </View>
             </View>
 
