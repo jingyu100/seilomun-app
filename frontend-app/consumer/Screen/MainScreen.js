@@ -1,11 +1,45 @@
-import React from "react";
-import { View, Text, TextInput, ScrollView, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, ScrollView, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import api from "../../api/api.js";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../Screen/Header/Header";
 import BottomTab from "../Screen/BottomTab/BottomTab";
 
 export default function MainScreen() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchExpiringProducts = async () => {
+      try {
+        const res = await api.get("/api/products/search", {
+          params: {
+            keyword: "",
+            filterType: "EXPIRING_SOON",
+            sortType: "EXPIRING",
+            page: 0,
+            size: 99,
+          },
+        });
+        const productList = res?.data?.content || [];
+        setProducts(productList);
+        console.log("임박특가 상품:", productList);
+      } catch (error) {
+        console.error("임박특가 조회 실패", error);
+      }
+    };
+
+    fetchExpiringProducts();
+  }, []);
+
+  const getThumbnailUrl = (product) => {
+    const url = product.thumbnailUrl;
+    if (!url) return "https://via.placeholder.com/100x100.png?text=No+Image";
+    return url.startsWith("http")
+      ? url
+      : `https://seilomun-bucket.s3.ap-northeast-2.amazonaws.com/${url}`;
+  };
+
   const categories = [
     { icon: "storefront-outline", label: "편의점" },
     { icon: "cafe-outline", label: "빵집" },
@@ -47,14 +81,70 @@ export default function MainScreen() {
 
         {/* 임박특가 상품 */}
         <Text style={styles.recommendationTitle}>임박특가 추천</Text>
-        <View style={styles.products}>
-          <View style={styles.productBox}>
-            <Text>상품 1</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginBottom: 30 }}
+        >
+          <View style={{ flexDirection: "row" }}>
+            {products.map((product) => (
+              <View key={product.id} style={styles.productBox}>
+                <View
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Image
+                    source={{ uri: getThumbnailUrl(product) }}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: 8,
+                    }}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: 14,
+                    width: "100%",
+                    marginBottom: 4,
+                  }}
+                >
+                  {product.name}
+                </Text>
+
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", marginBottom: 2 }}
+                >
+                  <Text style={{ fontWeight: "bold", fontSize: 13, color: "#000" }}>
+                    {product.discountedPrice.toLocaleString()}원
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#999",
+                      marginLeft: 4,
+                      textDecorationLine: "line-through",
+                    }}
+                  >
+                    {product.originalPrice.toLocaleString()}원
+                  </Text>
+                  <Text style={{ fontSize: 12, color: "red", marginLeft: 4 }}>
+                    {product.discountRate}%
+                  </Text>
+                </View>
+
+                <Text style={{ fontSize: 11, color: "#777" }}>{product.expiryDate}</Text>
+              </View>
+            ))}
           </View>
-          <View style={styles.productBox}>
-            <Text>상품 2</Text>
-          </View>
-        </View>
+        </ScrollView>
 
         {/* NEW 상품 추천 */}
         <Text style={styles.recommendationTitle}>NEW 상품 추천</Text>
@@ -74,7 +164,7 @@ export default function MainScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 16 },
+  container: { flex: 1, paddingHorizontal: 16, backgroundColor: "#fff" },
   searchBar: {
     marginTop: 30,
     flexDirection: "row",
@@ -102,13 +192,12 @@ const styles = StyleSheet.create({
   recommendationTitle: { fontWeight: "bold", marginBottom: 8 },
   products: { flexDirection: "row", justifyContent: "space-between" },
   productBox: {
-    height: 170,
-    width: 100,
-    flex: 1,
-    backgroundColor: "#eee",
-    padding: 20,
+    height: 200, // 170 → 200
+    width: 150,
+    padding: 16, // 20 → 16 (약간 줄이기)
     borderRadius: 12,
     marginRight: 8,
     marginBottom: 30,
+    flexShrink: 0,
   },
 });
