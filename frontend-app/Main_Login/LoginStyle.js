@@ -1,4 +1,4 @@
-// frontend-app/consumer/Style/LoginStyle.js
+// frontend-app/customer/Style/LoginStyle.js
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
