@@ -17,7 +17,7 @@ export default function StoreMiniInfo({
     <View>
         <TouchableOpacity
             style={styles.RatingBtn}
-            onPress={() => navigation.navigate('ConsumerLogin')}
+            onPress={() => navigation.navigate('CustomerLogin')}
         >
             <Image source={require('../../../../Image/starIcon.png')} />
             <Text>{rating}</Text>

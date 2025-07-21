@@ -15,7 +15,7 @@ const LoginScreen = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={() => navigation.navigate("ConsumerLogin")}
+        onPress={() => navigation.navigate("CustomerLogin")}
       >
         <Text style={styles.loginButtonText}>소비자 로그인</Text>
       </TouchableOpacity>
