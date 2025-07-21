@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import useStoreInfo from "../../../Hook/useStoreInfo.js";
-import styles from './StoreStyle';
+import styles from './StoreStyle.js';
 import StoreHead from "./StoreComponents/StoreHead.js";
 
 export default function StoreScreen() {
@@ -11,7 +11,7 @@ export default function StoreScreen() {
     // const storeImages = sellerInformationDto?.sellerPhotoUrls;
 
     return (
-        <View>
+        <View style={styles.container}>
             {/* <Image 
                 source={
                     storeImages && storeImages.length > 0
@@ -27,19 +27,20 @@ export default function StoreScreen() {
                 resizeMode="cover" // object-fit: cover 대체용
             />
                  
-            <View>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 60 }}>
                 <View style={styles.storeMargin}>
                     <StoreHead
                         testID='storeHead'
                         // store={store}
                         // sellerId={sellerId}
-                        // onOpenChat={handleOpenChat}  
+                        // onOpenChat={handleOpenChat}
                     />
                 </View>
-            </View>
-            <View testID="storeBdoy">
-                
-            </View>
+
+                <View testID="storeBdoy">
+                    {/* 여기에 리뷰, 기타 내용이 추가되면 다 보여짐 */}
+                </View>
+            </ScrollView>
         </View>
     )
 }

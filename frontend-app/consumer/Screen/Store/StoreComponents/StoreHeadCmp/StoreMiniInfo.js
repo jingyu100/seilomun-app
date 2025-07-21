@@ -1,33 +1,37 @@
 import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
-import styles from "../../\bStoreStyle";
+import styles from '../../StoreStyle.js';
 
 export default function StoreMiniInfo({ 
-    rating, 
-    address, 
-    addressDetail, 
-    phone, 
-    minOrderAmount, 
-    deliveryFee,
+    // rating, 
+    // address, 
+    // addressDetail, 
+    // phone, 
+    // minOrderAmount, 
+    // deliveryFee,
     onGoToReviewTab,
 }) {
 
-    const validDeliveryFees = (deliveryFees || [])
-        .filter((fee) => fee.deleted === false)
-        .sort((a, b) => a.ordersMoney - b.ordersMoney);
+    // const validDeliveryFees = (deliveryFees || [])
+    //     .filter((fee) => fee.deleted === false)
+    //     .sort((a, b) => a.ordersMoney - b.ordersMoney);
 
     return (
         <View>
+            <Text>
+                {/* {address}, {addressDetail} */}
+            </Text>
             <TouchableOpacity
                 style={styles.RatingBtn}
                 onPress={onGoToReviewTab}
             >
                 <Image source={require('../../../../../assets/starIcon.png')} />
-                <Text>{rating}</Text>
+                <Text>
+                    {/* {rating} */}
+                </Text>
             </TouchableOpacity>
-            <Text>{address}, {addressDetail}</Text>
             <View>
                 <Text>배달 주문 금액</Text>
-                {validDeliveryFees.length > 0 ? (
+                {/* {validDeliveryFees.length > 0 ? (
                     validDeliveryFees.map((fee, idx) => (
                         <View key={idx}>
                             <Text>{fee.ordersMoney.toLocaleString()}원 이상 </Text>
@@ -36,7 +40,8 @@ export default function StoreMiniInfo({
                     ))
                     ) : (
                     <Text>배달 없음</Text>
-                )}
+                )} */}
+                <Text>배달 없음</Text>
             </View>
         </View>
     )
