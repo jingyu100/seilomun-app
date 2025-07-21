@@ -45,14 +45,25 @@ export default function MainScreen() {
           <Text style={styles.eventPage}>1 / 19</Text>
         </View>
 
-        {/* Products */}
-        <Text style={styles.recommendationTitle}>소비자 맞춤 추천 상품</Text>
+        {/* 임박특가 상품 */}
+        <Text style={styles.recommendationTitle}>임박특가 추천</Text>
         <View style={styles.products}>
           <View style={styles.productBox}>
             <Text>상품 1</Text>
           </View>
           <View style={styles.productBox}>
             <Text>상품 2</Text>
+          </View>
+        </View>
+
+        {/* NEW 상품 추천 */}
+        <Text style={styles.recommendationTitle}>NEW 상품 추천</Text>
+        <View style={styles.products}>
+          <View style={styles.productBox}>
+            <Text>NEW 상품 1</Text>
+          </View>
+          <View style={styles.productBox}>
+            <Text>NEW 상품 2</Text>
           </View>
         </View>
       </ScrollView>
@@ -98,5 +109,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     marginRight: 8,
+    marginBottom: 30,
   },
 });
