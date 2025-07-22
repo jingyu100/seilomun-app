@@ -2,8 +2,8 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   storeMargin: {
-    marginTop: 12,
-    marginHorizontal: 15,
+    marginTop: 15,
+    marginHorizontal: 18,
   },
   container: {
     position: 'relative',
@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
     top: 0,
     width: '100%',
     height: 250,
+    zIndex: -1,
   },
   storeUI: {
     position: 'relative',
@@ -117,12 +118,16 @@ const styles = StyleSheet.create({
       backgroundColor: 'black',
   },
   tabContent: {
-      padding: 16,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
 
   // 가게 바디 부분
   storeBody: {
-
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // StoreMainInfo 부분
