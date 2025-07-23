@@ -4,13 +4,13 @@ import KakaoMapApi from '../../../../../GlobalCmp/KakaoMapApi';
 import styles from '../../StoreStyle';
 
 export default function StoreMainInfo(
-    // {
-    //     address,
-    //     addressDetail,
-    //     phone,
-    //     operatingHours,
-    //     storeDescription,
-    // }
+    {
+        address,
+        addressDetail,
+        phone,
+        operatingHours,
+        storeDescription,
+    }
 ) {
     return(
         <View style={styles.storeMainInfo}>

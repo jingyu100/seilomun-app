@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRoute, useNavigation } from "@react-navigation/native";
-// import api from "../api/config";
+import api from "../api/api.js";
 import { Alert } from "react-native";
 
 export default function useStoreInfo() {
@@ -19,6 +19,7 @@ export default function useStoreInfo() {
       try {
         const response = await api.get(`/api/sellers/${sellerId}`);
         console.log("API 응답:", response.data);
+        console.log("API 호출 시도, sellerId:", sellerId);
 
         const sellerInformationDto = response.data.data.seller;
 

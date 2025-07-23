@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'blue',
+    backgroundColor: '#fff',
     width: 'auto',
     height: 'auto',
     overflow: 'scroll',
