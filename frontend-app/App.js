@@ -7,12 +7,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./Main_Login/LoginScreen";
 import MainScreen from "./consumer/Screen/MainScreen";
 import CustomerLoginScreen from "./consumer/Screen/Login/CustomerLoginScreen";
-import StoreScreen from "./consumer/Screen/Store/StoreScreen";
 import SellerLoginScreen from "./Seller/Screen/SellerLoginScreen";
+import StoreScreen from "./consumer/Screen/Store/StoreScreen";
+import CustomerRegisterScreen from "./consumer/Screen/Login/CustomerRegisterScreen";
 
 const Stack = createNativeStackNavigator();
 
-// 개발중인 화면 보고싶으면 initialRouteName 값 개발중인 화면 name으로 바꾸면 됨
 export default function App() {
   return (
     <NavigationContainer>
@@ -22,6 +22,7 @@ export default function App() {
         <Stack.Screen name="CustomerLogin" component={CustomerLoginScreen} />
         <Stack.Screen name="SellerLogin" component={SellerLoginScreen} />
         <Stack.Screen name="Store" component={StoreScreen} />
+        <Stack.Screen name="CustomerRegister" component={CustomerRegisterScreen} /> 
       </Stack.Navigator>
     </NavigationContainer>
   );

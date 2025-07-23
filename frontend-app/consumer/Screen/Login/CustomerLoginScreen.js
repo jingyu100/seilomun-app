@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import styles from '../../Style/Login/CustomerLoginStyle';
+import { useNavigation } from '@react-navigation/native';
 
 export default function CustomerLoginScreen() {
+  const navigation = useNavigation(); 
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
 
@@ -13,7 +15,7 @@ export default function CustomerLoginScreen() {
 
       <TextInput
         placeholder="아이디"
-        placeholderTextColor="#999"
+        placeholderTextColor="#999"   
         value={id}
         onChangeText={setId}
         style={styles.input}
@@ -45,7 +47,11 @@ export default function CustomerLoginScreen() {
         <Text style={styles.footerDot}>|</Text>
         <Text style={styles.footerText}>비밀번호 찾기</Text>
         <Text style={styles.footerDot}>|</Text>
-        <Text style={styles.footerText}>회원가입</Text>
+
+        <TouchableOpacity onPress={() => navigation.navigate('CustomerRegister')}>
+          <Text style={styles.footerText}>회원가입</Text>
+        </TouchableOpacity>
+        
       </View>
     </View> 
   );
