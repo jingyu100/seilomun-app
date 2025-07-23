@@ -8,6 +8,7 @@ import BottomTab from "../Screen/BottomTab/BottomTab";
 
 export default function MainScreen() {
   const [products, setProducts] = useState([]);
+  const [latestProducts, setLatestProducts] = useState([]);
 
   useEffect(() => {
     const fetchExpiringProducts = async () => {
@@ -29,7 +30,27 @@ export default function MainScreen() {
       }
     };
 
+    const fetchLatestProducts = async () => {
+      try {
+        const res = await api.get("/api/products/search", {
+          params: {
+            keyword: "",
+            filterType: "RECENT",
+            sortType: "LATEST",
+            page: 0,
+            size: 99,
+          },
+        });
+        const productList = res?.data?.content || [];
+        setLatestProducts(productList);
+        console.log("받은 최신 상품 목록:", productList);
+      } catch (error) {
+        console.error("최신 상품 조회 실패", error);
+      }
+    };
+
     fetchExpiringProducts();
+    fetchLatestProducts();
   }, []);
 
   const getThumbnailUrl = (product) => {
@@ -74,9 +95,13 @@ export default function MainScreen() {
         </View>
 
         {/* Event */}
+        {/* Event (배너 이미지 추가) */}
         <View style={styles.eventBox}>
-          <Text style={{ fontSize: 16 }}>이벤트 내용</Text>
-          <Text style={styles.eventPage}>1 / 19</Text>
+          <Image
+            source={require("../Image/BannerSP1.jpg")}
+            style={styles.eventImage}
+            resizeMode="contain"
+          />
         </View>
 
         {/* 임박특가 상품 */}
@@ -91,9 +116,13 @@ export default function MainScreen() {
               <View key={product.id} style={styles.productBox}>
                 <View
                   style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 8,
+                    overflow: "hidden", // 추가!
+                    marginBottom: 8,
                     alignItems: "center",
                     justifyContent: "center",
-                    marginBottom: 8,
                   }}
                 >
                   <Image
@@ -103,7 +132,7 @@ export default function MainScreen() {
                       height: 100,
                       borderRadius: 8,
                     }}
-                    resizeMode="contain"
+                    resizeMode="cover"
                   />
                 </View>
                 <Text
@@ -148,14 +177,74 @@ export default function MainScreen() {
 
         {/* NEW 상품 추천 */}
         <Text style={styles.recommendationTitle}>NEW 상품 추천</Text>
-        <View style={styles.products}>
-          <View style={styles.productBox}>
-            <Text>NEW 상품 1</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginBottom: 30 }}
+        >
+          <View style={{ flexDirection: "row" }}>
+            {latestProducts.map((product) => (
+              <View key={product.id} style={styles.productBox}>
+                <View
+                  style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 8,
+                    overflow: "hidden", // 추가!
+                    marginBottom: 8,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Image
+                    source={{ uri: getThumbnailUrl(product) }}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: 8,
+                    }}
+                    resizeMode="cover"
+                  />
+                </View>
+                <Text
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: 14,
+                    width: "100%",
+                    marginBottom: 4,
+                  }}
+                >
+                  {product.name}
+                </Text>
+
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", marginBottom: 2 }}
+                >
+                  <Text style={{ fontWeight: "bold", fontSize: 13, color: "#000" }}>
+                    {product.discountedPrice.toLocaleString()}원
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#999",
+                      marginLeft: 4,
+                      textDecorationLine: "line-through",
+                    }}
+                  >
+                    {product.originalPrice.toLocaleString()}원
+                  </Text>
+                  <Text style={{ fontSize: 12, color: "red", marginLeft: 4 }}>
+                    {product.discountRate}%
+                  </Text>
+                </View>
+
+                <Text style={{ fontSize: 11, color: "#777" }}>{product.expiryDate}</Text>
+              </View>
+            ))}
           </View>
-          <View style={styles.productBox}>
-            <Text>NEW 상품 2</Text>
-          </View>
-        </View>
+        </ScrollView>
       </ScrollView>
 
       <BottomTab />
@@ -181,11 +270,9 @@ const styles = StyleSheet.create({
   },
   category: { alignItems: "center" },
   eventBox: {
-    backgroundColor: "#eee",
-    padding: 20,
     height: 200,
     borderRadius: 8,
-    position: "relative",
+    overflow: "hidden",
     marginBottom: 16,
   },
   eventPage: { position: "absolute", right: 10, top: 10 },
@@ -199,5 +286,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 30,
     flexShrink: 0,
+  },
+  eventImage: {
+    width: "100%",
+    height: "100%",
   },
 });
