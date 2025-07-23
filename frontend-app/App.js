@@ -16,12 +16,12 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Store" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Main" component={MainScreen} />
         <Stack.Screen name="CustomerLogin" component={CustomerLoginScreen} />
         <Stack.Screen name="SellerLogin" component={SellerLoginScreen} />
-        <Stack.Screen name="Store" component={StoreScreen} />
+        <Stack.Screen name="Store" component={StoreScreen} initialParams={{ sellerId: 4 }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

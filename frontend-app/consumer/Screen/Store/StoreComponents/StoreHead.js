@@ -16,12 +16,12 @@ import FavoriteButtonBox from './StoreHeadCmp/FavoriteButtonBox.js';
 import Inquiry from './StoreHeadCmp/Inquriy.js';
 
 export default function StoreHead(
-    // { store, sellerId, onOpenChat }
+    { store, sellerId, onOpenChat }
 ) {
   
-    // if (!store) return null;
+    if (!store) return null;
 
-    // const { sellerInformationDto } = store;
+    const { sellerInformationDto } = store;
     const { width: screenWidth } = useWindowDimensions();
     const [activeTab, setActiveTab] = useState('menu');
     const [tabLayouts, setTabLayouts] = useState({});
@@ -35,11 +35,11 @@ export default function StoreHead(
             label: '정보',
             content: (
                 <StoreMainInfo
-                    // address={sellerInformationDto?.postCode || '가게 주소 없음'}
-                    // addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
-                    // phone={sellerInformationDto?.phone || '연락처 없음'}
-                    // operatingHours={sellerInformationDto?.operatingHours || '운영 시간 정보 없음'}
-                    // storeDescription={sellerInformationDto?.storeDescription || '설명 없음'}
+                    address={sellerInformationDto?.postCode || '가게 주소 없음'}
+                    addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
+                    phone={sellerInformationDto?.phone || '연락처 없음'}
+                    operatingHours={sellerInformationDto?.operatingHours || '운영 시간 정보 없음'}
+                    storeDescription={sellerInformationDto?.storeDescription || '설명 없음'}
                 />
             ),
         },
@@ -88,30 +88,29 @@ export default function StoreHead(
             <View style={styles.storeHead_Top}>
                 <View style={styles.storeHead_left}>
                     <Text style={styles.storeTitle}>
-                        {/* {sellerInformationDto?.storeName || '상호 없음'} */}
-                        가게 이름
+                        {sellerInformationDto?.storeName || '상호 없음'}
                     </Text>
                     <StoreMiniInfo
-                        // rating={sellerInformationDto?.rating || '0.0'}
-                        // address={sellerInformationDto?.postCode || '가게 주소 없음'}
-                        // addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
-                        // phone={sellerInformationDto?.phone || '전화번호 없음'}
-                        // minOrderAmount={sellerInformationDto?.minOrderAmount || '배달 없음'}
-                        // deliveryFees={
-                        // (sellerInformationDto?.deliveryFeeDtos || [])
-                        //     .filter((fee) => fee.deleted === false)
-                        //     .sort((a, b) => a.ordersMoney - b.ordersMoney)
-                        // }
+                        rating={sellerInformationDto?.rating || '0.0'}
+                        address={sellerInformationDto?.postCode || '가게 주소 없음'}
+                        addressDetail={sellerInformationDto?.address || '가게 상세 주소 없음'}
+                        phone={sellerInformationDto?.phone || '전화번호 없음'}
+                        minOrderAmount={sellerInformationDto?.minOrderAmount || '배달 없음'}
+                        deliveryFees={
+                        (sellerInformationDto?.deliveryFeeDtos || [])
+                            .filter((fee) => fee.deleted === false)
+                            .sort((a, b) => a.ordersMoney - b.ordersMoney)
+                        }
 
                         // 리뷰 태그로 이동
                         onGoToReviewTab={() => handleTabPress('review')}
                     />
                 </View>
                     <View style={styles.storeHead_right}>
-                        {/* <Inquiry sellerId={sellerId} onOpenChat={onOpenChat} />
-                        <FavoriteButtonBox sellerId={sellerId} /> */}
-                        <FavoriteButtonBox />
-                        <Inquiry />
+                        <Inquiry sellerId={sellerId} onOpenChat={onOpenChat} />
+                        <FavoriteButtonBox sellerId={sellerId} />
+                        {/* <FavoriteButtonBox />
+                        <Inquiry /> */}
                     </View>
             </View>
 

@@ -1,88 +1,92 @@
-import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useRef, useState, useMemo, useEffect } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import useSellerProducts from "../../../../../Hook/useSellerProducts.js";
+import StoreProducts from "./StoreProducts.js";
 
-export default function StoreMenu({
-  // sellerId,
-  // id,
-  // index,
-  // productId,
-  // thumbnailUrl,
-  // name,
-  // date,
-  // expiryDate,
-  // description,
-  // originalPrice,
-  // discountPrice,
-  // maxDiscountRate,
-  // minDiscountRate,
-  // currentDiscountRate,
-}) {
+export default function StoreMenu() {
 
-  const navigation = useNavigation();
+    const { products }= useSellerProducts(); 
+    const [sortType, setSortType] = useState("BASIC");
 
-  // const handlePress = () => {
-  //   navigation.navigate("ProductDetail", {
-  //     sellerId,
-  //     productId: id,
-  //   });
-  // };
+    const productList= useMemo(() => {
+        if (!products) return [];
+        
+        const sortedProducts = [...products];
+        switch (sortType) {
+            case "LATEST":
+              return sortedProducts.sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0);
+                const dateB = new Date(b.createdAt || 0);
+                return dateB - dateA;
+              });
+      
+            case "LOW_PRICE":
+              return sortedProducts.sort((a, b) => a.discountPrice - b.discountPrice);
+      
+            case "HIGH_PRICE":
+              return sortedProducts.sort((a, b) => b.discountPrice - a.discountPrice);
+      
+            case "HIGH_RATING":
+              return sortedProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      
+            case "LOW_RATING":
+              return sortedProducts.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+      
+            case "EXPIRING":
+              return sortedProducts.sort((a, b) => {
+                const rateA = a.currentDiscountRate || 0;
+                const rateB = b.currentDiscountRate || 0;
+                return rateB - rateA;
+              });
+      
+            case "BASIC":
+            default:
+              // 기본 정렬 - 원본 배열 그대로
+              return sortedProducts;
+        }
+    }, [products, sortType]);
 
-  // const handlePress = () => {
-  //   navigation.navigate(
-
-  //   )
-  // };
+    if (!productList || productList.length === 0) {
+        return (
+            <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>등록된 제품이 없습니다.</Text>
+            </View>
+        );
+      }
 
   return (
-    <TouchableOpacity 
-      style={styles.storeMenu} 
-      // onPress={handlePress}
-    >
-      <Image 
-        // source={{ 
-        //   uri: thumbnailUrl 
-        // }} 
-        source={require('../../../../../assets/noImage.jpg')}
-        style={styles.image} 
-      />
-      {/* <Text style={styles.title} numberOfLines={1}>{name}</Text>
-      <View style={styles.productContainer}>
-        <Text style={styles.date}>{date}</Text>
-        <View style={styles.priceRow}>
-          <Text style={styles.discountPrice}>
-            {discountPrice.toLocaleString()}원
-          </Text>
-          <Text style={styles.originalPrice}>
-            {originalPrice.toLocaleString()}원
-          </Text>
-          <Text style={styles.discountRate}>
-            {currentDiscountRate}%
-          </Text>
+    <View>
+        <View>
+
         </View>
-        <Text style={styles.description} numberOfLines={2}>{description}</Text>
-      </View> */}
-      <View>
-        <Text style={styles.title} numberOfLines={1}>제품 이름</Text>
-        <View style={styles.productContainer}>
-            <Text style={styles.date}>2025-07-25</Text>
-            <View style={styles.priceRow}>
-                <Text style={styles.discountPrice}>
-                    5,900원
-                </Text>
-                <Text style={styles.originalPrice}>
-                    7,900원
-                </Text>
-                <Text style={styles.discountRate}>
-                    23%
-                </Text>
-            </View>
-            <Text style={styles.description} numberOfLines={2}>
-                강렬하고 얼얼한 크림에 푸주, 포두부, 분모자, 치즈비엔나 등 다양한 토핑의 조화
-            </Text>
+
+        <View>
+            {productList.map((item, index) => (
+                <StoreProducts
+                key={item.id?.toString() || index.toString()}
+                id={item.id}
+                index={index}
+                productId={item.id}
+                sellerId={item.sellerId}
+                thumbnailUrl={
+                    item.productPhotoUrl?.[0]?.startsWith("http")
+                    ? item.productPhotoUrl[0]
+                    : `https://seilomun-bucket.s3.ap-northeast-2.amazonaws.com/${item.productPhotoUrl[0]}`
+                }
+                name={item.name}
+                date={item.expiryDate}
+                expiryDate={item.expiryDate}
+                description={item.description}
+                originalPrice={item.originalPrice}
+                maxDiscountRate={item.maxDiscountRate}
+                minDiscountRate={item.minDiscountRate}
+                discountPrice={item.discountPrice}
+                currentDiscountRate={item.currentDiscountRate || "현재 할인"}
+                />
+            ))}
         </View>
-      </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -98,56 +102,5 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start",
         // justifyContent: 'center',
         alignItems: 'center',
-    },
-    image: {
-        width: 130,
-        height: 130,
-        resizeMode: "cover",
-        borderRadius: 5,
-        marginRight: 10,
-    },
-    title: {
-        fontSize: 19,
-        fontWeight: "600",
-        width: '45%',
-        marginBottom: 4,
-    },
-    date: {
-        fontSize: 13,
-        color: "gray",
-        marginBottom: 4,
-    },
-    productContainer: {
-
-    },
-    priceRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-        marginBottom: 15,
-    },
-    discountPrice: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: "#000",
-    },
-    originalPrice: {
-        fontSize: 13,
-        color: "gray",
-        textDecorationLine: "line-through",
-        marginBottom: 'auto',
-    },
-    discountRate: {
-        fontSize: 13,
-        color: "red",
-        fontWeight: "bold",
-        top: -2,
-        marginBottom: 'auto',
-    },
-    description: {
-        fontSize: 14,
-        color: "#444",
-        width: '45%',
-        marginBottom: 8,
     },
 });
