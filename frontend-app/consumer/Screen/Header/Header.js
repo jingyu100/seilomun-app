@@ -11,6 +11,10 @@ export default function Header() {
         alignItems: "center",
         paddingVertical: 16,
         zIndex: 1000,
+        backgroundColor: "#fff",
+        paddingHorizontal: 15,
+        borderBottomWidth: 1,
+        borderColor: "#ccc",
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>

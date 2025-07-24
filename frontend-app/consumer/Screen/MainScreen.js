@@ -70,9 +70,8 @@ export default function MainScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+      <Header />
       <ScrollView style={styles.container}>
-        <Header />
-
         {/* Search */}
         <View style={styles.searchBar}>
           <Ionicons
@@ -100,7 +99,7 @@ export default function MainScreen() {
           <Image
             source={require("../Image/BannerSP1.jpg")}
             style={styles.eventImage}
-            resizeMode="contain"
+            resizeMode="cover"
           />
         </View>
 
@@ -253,12 +252,13 @@ export default function MainScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 16, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff" },
   searchBar: {
     marginTop: 30,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#eee",
+    marginHorizontal: 16,
     padding: 10,
     borderRadius: 8,
     marginBottom: 16,
@@ -266,17 +266,19 @@ const styles = StyleSheet.create({
   categories: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginHorizontal: 16,
     marginBottom: 16,
   },
   category: { alignItems: "center" },
   eventBox: {
-    height: 200,
+    width: "100%",
     borderRadius: 8,
     overflow: "hidden",
     marginBottom: 16,
+    alignItems: "center",
   },
   eventPage: { position: "absolute", right: 10, top: 10 },
-  recommendationTitle: { fontWeight: "bold", marginBottom: 8 },
+  recommendationTitle: { fontWeight: "bold", marginBottom: 8, marginHorizontal: 16 },
   products: { flexDirection: "row", justifyContent: "space-between" },
   productBox: {
     height: 200, // 170 → 200
@@ -289,6 +291,7 @@ const styles = StyleSheet.create({
   },
   eventImage: {
     width: "100%",
-    height: "100%",
+    height: 180,
+    resizeMode: "contain",
   },
 });
