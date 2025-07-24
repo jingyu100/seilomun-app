@@ -64,25 +64,25 @@ export default function StoreMenu() {
         <View>
             {productList.map((item, index) => (
                 <StoreProducts
-                key={item.id?.toString() || index.toString()}
-                id={item.id}
-                index={index}
-                productId={item.id}
-                sellerId={item.sellerId}
-                thumbnailUrl={
-                    item.productPhotoUrl?.[0]?.startsWith("http")
-                    ? item.productPhotoUrl[0]
-                    : `https://seilomun-bucket.s3.ap-northeast-2.amazonaws.com/${item.productPhotoUrl[0]}`
-                }
-                name={item.name}
-                date={item.expiryDate}
-                expiryDate={item.expiryDate}
-                description={item.description}
-                originalPrice={item.originalPrice}
-                maxDiscountRate={item.maxDiscountRate}
-                minDiscountRate={item.minDiscountRate}
-                discountPrice={item.discountPrice}
-                currentDiscountRate={item.currentDiscountRate || "현재 할인"}
+                    key={item.id?.toString() || index.toString()}
+                    id={item.id}
+                    index={index}
+                    productId={item.id}
+                    sellerId={item.sellerId}
+                    thumbnailUrl={
+                        item.productPhotoUrl?.[0]?.startsWith("http")
+                        ? item.productPhotoUrl[0]
+                        : `https://seilomun-bucket.s3.ap-northeast-2.amazonaws.com/${item.productPhotoUrl[0]}`
+                    }
+                    name={item.name}
+                    date={item.expiryDate}
+                    expiryDate={item.expiryDate}
+                    description={item.description}
+                    originalPrice={item.originalPrice}
+                    maxDiscountRate={item.maxDiscountRate}
+                    minDiscountRate={item.minDiscountRate}
+                    discountPrice={item.discountPrice}
+                    currentDiscountRate={item.currentDiscountRate || "현재 할인"}
                 />
             ))}
         </View>

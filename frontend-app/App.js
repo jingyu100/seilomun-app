@@ -8,6 +8,7 @@ import LoginScreen from "./Main_Login/LoginScreen";
 import MainScreen from "./consumer/Screen/MainScreen";
 import CustomerLoginScreen from "./consumer/Screen/Login/CustomerLoginScreen";
 import StoreScreen from "./consumer/Screen/Store/StoreScreen";
+import ProductScreen from "./consumer/Screen/Product/ProductScreen";
 import SellerLoginScreen from "./Seller/Screen/SellerLoginScreen";
 
 const Stack = createNativeStackNavigator();
@@ -22,6 +23,7 @@ export default function App() {
         <Stack.Screen name="CustomerLogin" component={CustomerLoginScreen} />
         <Stack.Screen name="SellerLogin" component={SellerLoginScreen} />
         <Stack.Screen name="Store" component={StoreScreen} initialParams={{ sellerId: 4 }} />
+        <Stack.Screen name="Product" component={ProductScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

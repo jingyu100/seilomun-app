@@ -25,7 +25,7 @@ export default function StoreProducts({
     const navigation = useNavigation();
 
     const handlePress = () => {
-        navigation.navigate("ProductDetail", {
+        navigation.navigate("Product", {
         sellerId,
         productId: id,
         });
