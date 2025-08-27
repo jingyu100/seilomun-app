@@ -10,19 +10,24 @@ import CustomerLoginScreen from "./consumer/Screen/Login/CustomerLoginScreen";
 import SellerLoginScreen from "./seller/Screen/SellerLoginScreen";
 import StoreScreen from "./consumer/Screen/Store/StoreScreen";
 import CustomerRegisterScreen from "./consumer/Screen/Login/CustomerRegisterScreen";
+import CustomerSettingsScreen from "./consumer/Screen/UserSettings/CustomerSettingsScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Main" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName="CustomerSettings"
+        screenOptions={{ headerShown: false }}
+      >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Main" component={MainScreen} />
         <Stack.Screen name="CustomerLogin" component={CustomerLoginScreen} />
         <Stack.Screen name="SellerLogin" component={SellerLoginScreen} />
         <Stack.Screen name="Store" component={StoreScreen} />
         <Stack.Screen name="CustomerRegister" component={CustomerRegisterScreen} />
+        <Stack.Screen name="CustomerSettings" component={CustomerSettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -69,7 +69,7 @@ export default function MainScreen() {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top", "bottom"]}>
       <Header />
       <ScrollView style={styles.container}>
         {/* Search */}

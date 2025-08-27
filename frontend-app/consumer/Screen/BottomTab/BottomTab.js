@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 const TabItem = ({ icon, label, focused }) => (
@@ -9,9 +10,24 @@ const TabItem = ({ icon, label, focused }) => (
   </TouchableOpacity>
 );
 
-export default function BottomTab() {
+export default function BottomTab({
+  backgroundColor = "#fff",
+  borderColor = "#ccc",
+  fixed = false,
+}) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.bottomTab}>
+    <View
+      style={[
+        styles.bottomTab,
+        {
+          backgroundColor,
+          borderColor,
+          paddingBottom: insets?.bottom || 8,
+        },
+        fixed ? styles.fixed : null,
+      ]}
+    >
       <TabItem icon="document-text-outline" label="주문내역" />
       <TabItem icon="chatbubble-outline" label="채팅" />
       <TabItem icon="home-sharp" label="홈" focused />
@@ -35,5 +51,11 @@ const styles = StyleSheet.create({
     width: "20%",
     alignItems: "center",
     justifyContent: "center",
+  },
+  fixed: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 });
