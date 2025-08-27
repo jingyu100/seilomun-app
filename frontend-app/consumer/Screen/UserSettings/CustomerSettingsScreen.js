@@ -31,7 +31,7 @@ export default function CustomerSettingsScreen() {
           </View>
           <View style={styles.separator} />
           <View style={styles.row}>
-            <Text style={styles.rowLabel}>생년 월일</Text>
+            <Text style={styles.rowLabel}>생년 월일 변경</Text>
             <Text style={styles.rowArrow}>›</Text>
           </View>
         </View>
