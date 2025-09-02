@@ -3,8 +3,8 @@ import { View, Text, TextInput, ScrollView, StyleSheet, Image } from "react-nati
 import { Ionicons } from "@expo/vector-icons";
 import api from "../../api/api.js";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Header from "../Screen/Header/Header";
-import BottomTab from "../Screen/BottomTab/BottomTab";
+import Header from "./header/Header.js";
+import BottomTab from "./bottomTab/BottomTab.js";
 
 export default function MainScreen() {
   const [products, setProducts] = useState([]);

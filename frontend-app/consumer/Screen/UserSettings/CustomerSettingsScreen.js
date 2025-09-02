@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import SimpleHeader from "../Header/SimpleHeader";
-import BottomTab from "../BottomTab/BottomTab";
+import SimpleHeader from "../header/SimpleHeader";
+import BottomTab from "../bottomTab/BottomTab";
 
 export default function CustomerSettingsScreen() {
   return (
