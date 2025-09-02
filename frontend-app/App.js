@@ -7,7 +7,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./Main_Login/LoginScreen";
 import MainScreen from "./consumer/Screen/MainScreen";
 import CustomerLoginScreen from "./consumer/Screen/Login/CustomerLoginScreen";
-import SellerLoginScreen from "./seller/Screen/SellerLoginScreen";
+import SellerLoginScreen from "./Seller/Screen/SellerLoginScreen";
 import StoreScreen from "./consumer/Screen/Store/StoreScreen";
 import CustomerRegisterScreen from "./consumer/Screen/Login/CustomerRegisterScreen";
 import CustomerSettingsScreen from "./consumer/Screen/UserSettings/CustomerSettingsScreen";
@@ -17,10 +17,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="CustomerSettings"
-        screenOptions={{ headerShown: false }}
-      >
+      <Stack.Navigator initialRouteName="Main" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Main" component={MainScreen} />
         <Stack.Screen name="CustomerLogin" component={CustomerLoginScreen} />
