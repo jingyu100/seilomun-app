@@ -6,14 +6,11 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import useProductInfo from "../../../../Hook/useProductInfo.js";
 import styles from "../ProductStyle.js";
 import ProductHeadTitle from "./ProductHeadTitle.js";
-
-const { width } = Dimensions.get("window");
 
 export default function ProductHead() {
   
@@ -60,6 +57,7 @@ export default function ProductHead() {
                     stockQuantity={product.stockQuantity || 0}
                 />
             </View>
+            
         </View>
     );
 }

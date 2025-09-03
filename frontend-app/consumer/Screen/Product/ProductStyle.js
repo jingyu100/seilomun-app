@@ -4,6 +4,7 @@ const styles = StyleSheet.create({
   productMargin: {
     marginTop: 15,
     marginHorizontal: 18,
+    marginBottom: 10,
   },
   container: {
     position: 'relative',
@@ -20,15 +21,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     width: '100%',
-    height: 250,
+    height: 280,
     zIndex: -1,
   },
   productUI: {
     position: 'relative',
     width: '100%',
-    height: '100%',
-    paddingTop: 100,
+    height: '100%', 
+    paddingTop: 170,
     zIndex: 100,
+  },
+  productGap: {
+    backgroundColor: '#e3e3e3', 
+    gap: 8,
   },
   storeHead: {
     backgroundColor: '#fff',
@@ -91,7 +96,7 @@ const styles = StyleSheet.create({
   prodHdDtl_Head: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 16,
   },
   prodHdDtlHd_Bottom: {
     flexDirection: 'column',
@@ -112,12 +117,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   description: {
-    fontSize: 16,
-    marginBottom: 20,
-    color: "#444",
+    fontSize: 15,
+    marginBottom: 15,
+    color: "#666",
   },
   stock: {
-    fontSize: 17,
+    fontSize: 15,
     marginBottom: 8,
     color: "#000",
   },
@@ -149,6 +154,7 @@ const styles = StyleSheet.create({
   expiry: {
     color: "gray",
     marginBottom: 6,
+    fontSize: 14,
   },
   totalBox: {
     flexDirection: "row",
@@ -184,13 +190,12 @@ const styles = StyleSheet.create({
   },
 
 
-  // 가게 즐겨찾기
-  tabItem: {
-    // left: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
+   // 제품 추천 영역
+   prodSuggest_title: {
+      marginTop: 4,
+      marginBottom: 7,
+   },
+  
 
   // 제품 페이지 구매, 장바구니 영역
     prodBottom: {
