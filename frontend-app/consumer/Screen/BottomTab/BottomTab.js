@@ -13,7 +13,7 @@ const TabItem = ({ icon, label, focused }) => (
 export default function BottomTab({
   backgroundColor = "#fff",
   borderColor = "#ccc",
-  fixed = true,
+  fixed = false,
 }) {
   const insets = useSafeAreaInsets();
   return (
@@ -23,7 +23,7 @@ export default function BottomTab({
         {
           backgroundColor,
           borderColor,
-          paddingBottom: Math.max(insets?.bottom || 0, 8),
+          paddingBottom: insets?.bottom || 8,
         },
         fixed ? styles.fixed : null,
       ]}
@@ -46,7 +46,6 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     backgroundColor: "#fff",
     zIndex: 1000,
-    elevation: 8,
   },
   tabItem: {
     width: "20%",

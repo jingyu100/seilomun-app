@@ -74,27 +74,7 @@ export default function MainScreen() {
           const userStr = await AsyncStorage.getItem("user");
           const user = userStr ? JSON.parse(userStr) : null;
           setIsLoggedIn(Boolean(token));
-          let nickname = user?.nickname || "";
-          if (token && !nickname) {
-            try {
-              const info = await api.get("/api/customers");
-              const customer = info?.data?.data?.customer;
-              if (customer?.nickname) {
-                nickname = customer.nickname;
-                await AsyncStorage.setItem(
-                  "user",
-                  JSON.stringify({
-                    ...(user || {}),
-                    nickname,
-                    id: customer.id,
-                    email: customer.email,
-                    userType: "CUSTOMER",
-                  })
-                );
-              }
-            } catch {}
-          }
-          setUserNickname(nickname);
+          setUserNickname(user?.nickname || "");
         } catch (e) {
           setIsLoggedIn(false);
           setUserNickname("");
@@ -139,7 +119,7 @@ export default function MainScreen() {
         onPressLogout={handleLogout}
         nickname={userNickname}
       />
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 80 }}>
+      <ScrollView style={styles.container}>
         {/* Search */}
         <View style={styles.searchBar}>
           <Ionicons
