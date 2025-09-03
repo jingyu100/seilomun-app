@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import styles from '../StoreStyle.js';
 import StoreMiniInfo from './StoreHeadCmp/StoreMiniInfo';
+import StoreEvent from './StoreHeadCmp/StoreEvent.js';
 import StoreMenu from './StoreBodyCmp/StoreMenu.js';
 import StoreMainInfo from './StoreBodyCmp/StoreMainInfo.js';
 import StoreReview from './StoreBodyCmp/StoreReview.js';
@@ -97,9 +98,9 @@ export default function StoreHead(
                         phone={sellerInformationDto?.phone || '전화번호 없음'}
                         minOrderAmount={sellerInformationDto?.minOrderAmount || '배달 없음'}
                         deliveryFees={
-                        (sellerInformationDto?.deliveryFeeDtos || [])
-                            .filter((fee) => fee.deleted === false)
-                            .sort((a, b) => a.ordersMoney - b.ordersMoney)
+                            (sellerInformationDto?.deliveryFeeDtos || [])
+                                .filter((fee) => fee.deleted === false)
+                                .sort((a, b) => a.ordersMoney - b.ordersMoney)
                         }
 
                         // 리뷰 태그로 이동
@@ -114,35 +115,37 @@ export default function StoreHead(
                     </View>
             </View>
 
+           <StoreEvent /> 
+
             {/* 탭 영역 */}
             <View style={styles.storeHead_bottom}>
                 <View style={styles.tabUI}>
-                {tabs.map(({ key, label }) => (
-                    <TouchableOpacity
-                    key={key}
-                    onLayout={(e) => handleLayout(key, e)}
-                    onPress={() => handleTabPress(key)}
-                    style={styles.storeTabItem}
-                    >
-                        <Text
-                            style={[
-                            styles.tabText,
-                            activeTab === key && styles.activeTabText,
-                            ]}
+                    {tabs.map(({ key, label }) => (
+                        <TouchableOpacity
+                            key={key}
+                            onLayout={(e) => handleLayout(key, e)}
+                            onPress={() => handleTabPress(key)}
+                            style={styles.storeTabItem}
                         >
-                            {label}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-                <Animated.View
-                    style={[
-                    styles.underline,
-                    {
-                        left: underlineLeft,
-                        width: underlineWidth,
-                    },
-                    ]}
-                />
+                            <Text
+                                style={[
+                                    styles.tabText,
+                                    activeTab === key && styles.activeTabText,
+                                ]}
+                            >
+                                {label}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                    <Animated.View
+                        style={[
+                            styles.underline,
+                            {
+                                left: underlineLeft,
+                                width: underlineWidth,
+                            },
+                        ]}
+                    />
                 </View>
 
                 {/* 탭 콘텐츠 */}

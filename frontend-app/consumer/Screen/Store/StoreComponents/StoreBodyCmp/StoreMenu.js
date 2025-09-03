@@ -92,15 +92,15 @@ export default function StoreMenu() {
 
 const styles = StyleSheet.create({
     storeMenu: {
-        flexDirection: 'row',
-        width: 'auto',
-        height: 'auto',
-        borderBottomWidth: 1,
-        borderColor: "#ccc",
-        paddingVertical: 15,
-        marginBottom: 20,
-        justifyContent: "flex-start",
-        // justifyContent: 'center',
-        alignItems: 'center',
+      flexDirection: 'row',
+      width: 'auto',
+      height: 'auto',
+      borderBottomWidth: 1,
+      borderColor: "#ccc",
+      paddingVertical: 15,
+      marginBottom: 20,
+      justifyContent: "flex-start",
+      // justifyContent: 'center',
+      alignItems: 'center',
     },
 });

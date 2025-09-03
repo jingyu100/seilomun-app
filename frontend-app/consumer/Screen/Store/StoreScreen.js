@@ -66,22 +66,22 @@ export default function StoreScreen() {
                     )}
                     scrollEventThrottle={16}
                 >
-                <View style={{ backgroundColor: '#fff', }}>
-                    <View style={styles.storeMargin}>
-                        <StoreHead
-                            testID='storeHead'
-                            store={store}
-                            sellerId={sellerId}
-                            // onOpenChat={handleOpenChat}
-                        />
+                    <View style={{ backgroundColor: '#fff', }}>
+                        <View style={styles.storeMargin}>
+                            <StoreHead
+                                testID='storeHead'
+                                store={store}
+                                sellerId={sellerId}
+                                // onOpenChat={handleOpenChat}
+                            />
 
-                        <View testID="storeBdoy">
-                            {/* 여기에 리뷰, 기타 내용이 추가되면 다 보여짐 */}
-                            
+                            <View testID="storeBdoy">
+                                {/* 여기에 리뷰, 기타 내용이 추가되면 다 보여짐 */}
+                                
+                            </View>
                         </View>
                     </View>
-                </View>
-            </Animated.ScrollView>
+                </Animated.ScrollView>
             <BottomTab />
         </SafeAreaView>
     )

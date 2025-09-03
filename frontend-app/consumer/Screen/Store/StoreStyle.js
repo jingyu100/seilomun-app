@@ -9,9 +9,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    width: 'auto',
-    height: 'auto',
+    backgroundColor: '#ccc',
+    width: '100%',
+    height: '100%',
     overflow: 'scroll',
     flex: 1,
   },
@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
   storeHead_Top: {
     display: 'flex',
     flexDirection: 'row',
+    marginBottom: 16,
   },
   storeHead_left: {
     flexDirection: 'column',
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
   },
 
   storeHead_bottom: {
-    paddingTop: 16,
+    paddingTop: 12,
   },
 
   // 가게 즐겨찾기

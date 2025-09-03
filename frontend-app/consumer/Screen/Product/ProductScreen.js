@@ -8,6 +8,7 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import useProductInfo from '../../../Hook/useProductInfo.js';
 import styles from './ProductStyle.js';
@@ -16,8 +17,11 @@ import BottomTab from '../BottomTab/BottomTab.js';
 import ProductHead from './productHeadCmp/ProductHead.js';
 import ProductBody from './productBodyCmp/ProductBody.js';
 import ProductBottom from './productBottomCmp/ProductBottom.js';
+import ProductSuggest from './productHeadCmp/ProductSuggest.js';
 
 export default function ProductScreen() {
+
+  const screenHeight = Dimensions.get('window').height;
 
   const route = useRoute();
 
@@ -50,8 +54,8 @@ export default function ProductScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const imageScale = scrollY.interpolate({
-    inputRange: [-500, 0],
-    outputRange: [8, 1],
+    inputRange: [-600, 0],
+    outputRange: [5, 1],
     extrapolate: 'clamp',
   });
 
@@ -63,48 +67,62 @@ export default function ProductScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+
         {/* <Header /> */}
 
         <Animated.Image
             source={
-            Array.isArray(productImages) && productImages.length > 0
-                ? { uri: productImages[currentImageIndex] }
-                : require('../../../assets/noImage.jpg')
+              Array.isArray(productImages) && productImages.length > 0
+                  ? { uri: productImages[currentImageIndex] }
+                  : require('../../../assets/noImage.jpg')
             }
             style={[
-            styles.productImages,
-            {
+              styles.productImages,
+              {
                 transform: [
-                { scale: imageScale },
-                { translateY: imageTranslateY },
+                  { scale: imageScale },
+                  { translateY: imageTranslateY },
                 ],
-            },
+              },
             ]}
             resizeMode="cover"
         />
 
         {/* Product Head */}
-        <Animated.ScrollView
-            style={styles.productUI}
-            onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: false }
-            )}
-            scrollEventThrottle={16}
-        >
-            <View style={{ backgroundColor: '#fff' }}>
-            <View style={styles.productMargin}>
-                <ProductHead
-                product={product}
-                />
-            </View>
-            </View>
-        </Animated.ScrollView>
+          <Animated.ScrollView
+              style={styles.productUI}
+              onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: false }
+              )}
+              scrollEventThrottle={16}
+          >
+            <View style= {{ backgroundColor: '#fff', minHeight: '100%', }}>
+              <View style={styles.productGap}>
+                <View style={{ backgroundColor: '#fff', marginBottom: '24px', }}>
+                  <View style={styles.productMargin}>
+                      <ProductHead/>
+                  </View>
+                </View>
 
-        {/* Product Body */}
-        {/* <View>
-            <ProductBody />
-        </View> */}
+                {/* Product Suggest */}
+                <View style={{ backgroundColor: '#fff', marginBottom: '24px', }}>
+                  <View style={styles.productMargin}>
+                      <ProductSuggest product={product} />
+                  </View>
+                </View>
+                
+                
+                {/* Product Body */}
+                {/* <View style={{ backgroundColor: '#fff', marginBottom: '24px', }}>
+                    <ProductBody
+                      product={product}
+                    />
+                </View> */}
+
+              </View>
+            </View>
+          </Animated.ScrollView>
 
         {/* 바로구매, 장바구니 */}
         <ProductBottom />
