@@ -1,27 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  StyleSheet,
-  Image,
-  Alert,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, ScrollView, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import api from "../../api/api.js";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../Screen/Header/Header";
 import BottomTab from "../Screen/BottomTab/BottomTab";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 export default function MainScreen() {
   const [products, setProducts] = useState([]);
   const [latestProducts, setLatestProducts] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userNickname, setUserNickname] = useState("");
-  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchExpiringProducts = async () => {
@@ -66,36 +53,6 @@ export default function MainScreen() {
     fetchLatestProducts();
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      const loadAuthState = async () => {
-        try {
-          const token = await AsyncStorage.getItem("accessToken");
-          const userStr = await AsyncStorage.getItem("user");
-          const user = userStr ? JSON.parse(userStr) : null;
-          setIsLoggedIn(Boolean(token));
-          setUserNickname(user?.nickname || "");
-        } catch (e) {
-          setIsLoggedIn(false);
-          setUserNickname("");
-        }
-      };
-      loadAuthState();
-    }, [])
-  );
-
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem("accessToken");
-      await AsyncStorage.removeItem("user");
-      setIsLoggedIn(false);
-      setUserNickname("");
-      navigation.reset({ index: 0, routes: [{ name: "CustomerLogin" }] });
-    } catch (e) {
-      Alert.alert("알림", "로그아웃 중 오류가 발생했습니다.");
-    }
-  };
-
   const getThumbnailUrl = (product) => {
     const url = product.thumbnailUrl;
     if (!url) return "https://via.placeholder.com/100x100.png?text=No+Image";
@@ -113,12 +70,7 @@ export default function MainScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top", "bottom"]}>
-      <Header
-        isLoggedIn={isLoggedIn}
-        onPressLogin={() => navigation.navigate("CustomerLogin")}
-        onPressLogout={handleLogout}
-        nickname={userNickname}
-      />
+      <Header />
       <ScrollView style={styles.container}>
         {/* Search */}
         <View style={styles.searchBar}>
