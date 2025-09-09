@@ -156,38 +156,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     fontSize: 14,
   },
-  totalBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  quantityRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginVertical: 16,
-  },
-  qtyBtn: {
-    borderRadius: 4,
-    padding: 10,
-  },
-  qtyText: {
-    fontSize: 20,
-  },
-  qtyValue: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  disabledBtn: {
-    opacity: 0.4,
-  },
-  btnText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "600",
-    fontSize: 16,
-  },
+  
 
 
    // 제품 추천 영역
@@ -198,6 +167,42 @@ const styles = StyleSheet.create({
   
 
   // 제품 페이지 구매, 장바구니 영역
+  totalBox: {
+   flexDirection: "row",
+   alignItems: "center",
+   marginBottom: 14,
+   },
+   quantityRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 0,
+      marginLeft: 'auto',
+   },
+   qtyBtn: {
+      borderRadius: 4,
+      paddingHorizontal: 12,
+   },
+   qtyBtnText: {
+      fontSize: 22,
+      fontWeight: "400",
+   },
+   qtyText: {
+      fontSize: 18,
+   },
+   qtyValue: {
+      fontSize: 15,
+      fontWeight: "600",
+   },
+   disabledBtn: {
+      opacity: 0.4,
+   },
+   btnText: {
+      color: "#fff",
+      textAlign: "center",
+      fontWeight: "600",
+      fontSize: 16,
+   },
     prodBottom: {
         width: '100%',
         borderTopWidth: 1,

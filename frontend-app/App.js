@@ -10,6 +10,7 @@ import CustomerLoginScreen from "./consumer/Screen/Login/CustomerLoginScreen";
 import StoreScreen from "./consumer/Screen/Store/StoreScreen";
 import ProductScreen from "./consumer/Screen/Product/ProductScreen";
 import SellerLoginScreen from "./Seller/Screen/SellerLoginScreen";
+import PaymentScreen from "./consumer/Screen/payment/PaymentScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ export default function App() {
         <Stack.Screen name="SellerLogin" component={SellerLoginScreen} />
         <Stack.Screen name="Store" component={StoreScreen} initialParams={{ sellerId: 4 }} />
         <Stack.Screen name="Product" component={ProductScreen} />
+        <Stack.Screen name="Payment" component={PaymentScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

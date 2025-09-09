@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
   storeHead_Top: {
     display: 'flex',
     flexDirection: 'row',
-    marginBottom: 16,
   },
   storeHead_left: {
     flexDirection: 'column',
@@ -80,7 +79,7 @@ const styles = StyleSheet.create({
   },
 
   storeHead_bottom: {
-    paddingTop: 12,
+    // paddingTop: 12,
   },
 
   // 가게 즐겨찾기
