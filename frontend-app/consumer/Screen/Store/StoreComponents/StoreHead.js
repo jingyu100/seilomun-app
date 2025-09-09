@@ -115,8 +115,21 @@ export default function StoreHead(
                     </View>
             </View>
 
-           <StoreEvent /> 
-
+            {/* 가게 이벤트 영역 */}
+           <StoreEvent 
+                description={sellerInformationDto?.storeDescription || ""}
+                operatingHours={sellerInformationDto?.operatingHours || ""}
+                pickupTime={sellerInformationDto?.pickupTime || ""}
+                notification={sellerInformationDto?.notification || ""}
+                notificationPhotos={
+                    (sellerInformationDto?.notificationPhotos || []).map(url =>
+                        url.photoUrl.startsWith("http")
+                            ? url
+                            : `https://seilomun-bucket.s3.ap-northeast-2.amazonaws.com/${url.photoUrl}`
+                    )
+                }
+            />
+            
             {/* 탭 영역 */}
             <View style={styles.storeHead_bottom}>
                 <View style={styles.tabUI}>

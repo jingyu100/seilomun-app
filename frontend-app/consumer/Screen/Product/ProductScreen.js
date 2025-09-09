@@ -18,6 +18,7 @@ import ProductHead from './productHeadCmp/ProductHead.js';
 import ProductBody from './productBodyCmp/ProductBody.js';
 import ProductBottom from './productBottomCmp/ProductBottom.js';
 import ProductSuggest from './productHeadCmp/ProductSuggest.js';
+import StoreEvent from '../Store/StoreComponents/StoreHeadCmp/StoreEvent.js';
 
 export default function ProductScreen() {
 
@@ -102,6 +103,7 @@ export default function ProductScreen() {
                 <View style={{ backgroundColor: '#fff', marginBottom: '24px', }}>
                   <View style={styles.productMargin}>
                       <ProductHead/>
+                      <StoreEvent />
                   </View>
                 </View>
 

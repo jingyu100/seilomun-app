@@ -41,9 +41,9 @@ export default function ProductHeadTitle({
     const [quantity, setQuantity] = useState(1);
 
     const increaseQuantity = () => {
-          if (quantity >= stockQuantity) {
-          Alert.alert("최대 수량입니다.");
-          return;
+        if (quantity >= stockQuantity) {
+        Alert.alert("최대 수량입니다.");
+        return;
         }
         setQuantity(q => q + 1);
     };
@@ -73,7 +73,7 @@ export default function ProductHeadTitle({
         </View>
 
       
-      <Text style={styles.description} numberOfLines={1} >{description}</Text>
+      <Text style={styles.description}>{description}</Text>
       
       <Text style={styles.stock}>
         {stockQuantity > 0 ? `남은 수량: ${stockQuantity}` : "품절"}
