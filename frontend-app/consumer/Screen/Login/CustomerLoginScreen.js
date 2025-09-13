@@ -20,10 +20,11 @@ export default function CustomerLoginScreen() {
         userType: "CUSTOMER",
       });
 
-      console.log(loginRes);
+      console.log("로그인", loginRes);
 
       // 2) 토큰 저장(응답 바디 기준)
       const { accessToken, refreshToken, userType } = loginRes.data.data ?? loginRes.data;
+
       if (accessToken) await AsyncStorage.setItem("accessToken", accessToken);
       if (refreshToken) {
         await SecureStore.setItemAsync("refreshToken", refreshToken);
@@ -31,15 +32,21 @@ export default function CustomerLoginScreen() {
       }
       if (userType) await AsyncStorage.setItem("userType", userType);
 
+      console.log("AT(saved):", await AsyncStorage.getItem("accessToken"));
+      console.log("RT(saved):", await SecureStore.getItemAsync("refreshToken"));
+
       // 3) 내 정보 조회(토큰은 인터셉터가 자동 첨부)
-      const meRes = await api.get("/api/customers");
-      const customer = meRes.data?.data?.customer ?? meRes.data?.customer ?? {};
+      const meRes = await api.get("/api/customers/me");
+      console.log("내 정보 조회", meRes);
+      const payload = meRes.data?.data; // data 안의 data 객체
       const userData = {
-        id: customer.id,
-        email: customer.email,
-        nickname: customer.nickname,
-        userType: userType || "CUSTOMER",
+        id: payload.id,
+        email: payload.email,
+        nickname: payload.username, // username이 실제 닉네임
+        userType: payload.userType || "CUSTOMER",
       };
+
+      console.log("userData", userData);
 
       // 4) 로컬 저장 & 이동
       await AsyncStorage.setItem("user", JSON.stringify(userData));

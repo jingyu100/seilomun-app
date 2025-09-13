@@ -1,23 +1,23 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   logo: {
     width: 240,
     height: 240,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     marginBottom: 30,
   },
   input: {
-    width: '100%',
+    width: "100%",
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -25,41 +25,41 @@ export default StyleSheet.create({
     marginBottom: 15,
   },
   loginButton: {
-    backgroundColor: '#4CAF50',
-    width: '100%',
+    backgroundColor: "#4CAF50",
+    width: "100%",
     paddingVertical: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 30,
   },
   loginButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   divider: {
-    width: '100%',
+    width: "100%",
     height: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: "#ddd",
     marginBottom: 20,
   },
   snsLoginText: {
     fontSize: 14,
-    color: '#444',
+    color: "#444",
     marginBottom: 12,
   },
   footerLinks: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
   },
   footerText: {
     fontSize: 13,
-    color: '#888',
+    color: "#888",
     marginHorizontal: 3,
   },
   footerDot: {
     fontSize: 13,
-    color: '#ccc',
+    color: "#ccc",
     marginHorizontal: 2,
   },
 });

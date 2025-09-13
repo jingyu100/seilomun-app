@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function Header() {
+export default function Header({ username }) {
   return (
     <View
       style={{
@@ -19,7 +19,9 @@ export default function Header() {
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Ionicons name="menu" size={24} style={{ marginRight: 8 }} />
-        <Text style={{ fontSize: 13, fontWeight: "bold", lineHeight: 24 }}>내 집1 ▼</Text>
+        <Text style={{ fontSize: 13, fontWeight: "bold", lineHeight: 24 }}>
+          {username}
+        </Text>
       </View>
       <View style={{ flexDirection: "row" }}>
         <Ionicons name="notifications-outline" size={24} style={{ marginRight: 10 }} />
