@@ -2,9 +2,10 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
-const TabItem = ({ icon, label, focused }) => (
-  <TouchableOpacity style={styles.tabItem}>
+const TabItem = ({ icon, label, focused, onPress }) => (
+  <TouchableOpacity style={styles.tabItem} onPress={onPress}>
     <Ionicons name={icon} size={24} color={focused ? "black" : "gray"} />
     <Text style={{ color: focused ? "black" : "gray" }}>{label}</Text>
   </TouchableOpacity>
@@ -16,6 +17,13 @@ export default function BottomTab({
   fixed = false,
 }) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+
+  const handleChatPress = () => {
+    // 채팅방 목록으로 이동
+    navigation.navigate("ChatRoomList");
+  };
+
   return (
     <View
       style={[
@@ -29,7 +37,7 @@ export default function BottomTab({
       ]}
     >
       <TabItem icon="document-text-outline" label="주문내역" />
-      <TabItem icon="chatbubble-outline" label="채팅" />
+      <TabItem icon="chatbubble-outline" label="채팅" onPress={handleChatPress} />
       <TabItem icon="home-sharp" label="홈" focused />
       <TabItem icon="heart-outline" label="즐겨찾기" />
       <TabItem icon="person-outline" label="마이페이지" />
