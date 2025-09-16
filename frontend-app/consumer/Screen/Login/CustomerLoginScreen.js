@@ -5,11 +5,15 @@ import styles from "../../Style/Login/CustomerLoginStyle";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../../api/api";
 import * as SecureStore from "expo-secure-store";
+import useLogin from "../../../Hook/useLogin";
 
 export default function CustomerLoginScreen() {
   const [loginId, setLoginId] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const { setIsLoggedIn, setUser, isLoading } = useLogin();
   const navigation = useNavigation();
+
+  if (isLoading) return null;
 
   const handleLoginSubmit = async () => {
     try {
@@ -48,13 +52,15 @@ export default function CustomerLoginScreen() {
 
       console.log("userData", userData);
 
-      // 4) 로컬 저장 & 이동
+      // 4) 로컬 저장 & 전역 상태 업데이트
       await AsyncStorage.setItem("user", JSON.stringify(userData));
       await AsyncStorage.setItem("isLoggedIn", "true");
 
-      // TODO: 전역 상태(setUser, setIsLoggedIn)를 쓰는 경우 여기서 호출
-      // setUser(userData); setIsLoggedIn(true);
+      // 전역 상태 업데이트
+      setUser(userData);
+      setIsLoggedIn(true);
 
+      console.log("로그인 성공! 사용자 정보:", userData);
       navigation.navigate("Main");
     } catch (error) {
       console.warn("로그인 또는 사용자 정보 조회 실패:", error);

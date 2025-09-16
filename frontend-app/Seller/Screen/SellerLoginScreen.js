@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
-import styles from '../Style/SellerLoginStyle';
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import styles from "../Style/SellerLoginStyle";
 
 export default function SellerLoginScreen() {
-  const [id, setId] = useState('');
-  const [password, setPassword] = useState('');
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <View style={styles.container}>
-    <Image source={require('../../assets/spLogo.png')} style={styles.logo} />
-
+      <Image source={require("../../assets/spLogo.png")} style={styles.logo} />
 
       <TextInput
         placeholder="아이디"

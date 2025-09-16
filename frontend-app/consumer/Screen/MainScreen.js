@@ -6,24 +6,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../Screen/Header/Header";
 import BottomTab from "../Screen/BottomTab/BottomTab";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import useLogin from "../../Hook/useLogin";
 
 export default function MainScreen() {
   const [products, setProducts] = useState([]);
   const [latestProducts, setLatestProducts] = useState([]);
-  const [username, setUsername] = useState(""); // 추가
+  const { user, isLoggedIn, isLoading } = useLogin();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const storedUser = await AsyncStorage.getItem("user");
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setUsername(parsedUser.nickname);
-        }
-      } catch (error) {
-        console.error("유저 정보 로드 실패:", error);
-      }
-    };
     const fetchExpiringProducts = async () => {
       try {
         const res = await api.get("/api/products/search", {
@@ -61,7 +51,6 @@ export default function MainScreen() {
         console.error("최신 상품 조회 실패", error);
       }
     };
-    fetchUser();
     fetchExpiringProducts();
     fetchLatestProducts();
   }, []);
@@ -83,7 +72,7 @@ export default function MainScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top"]}>
-      <Header username={username} />
+      <Header username={user?.nickname || ""} />
       <ScrollView style={styles.container}>
         {/* Search */}
         <View style={styles.searchBar}>
