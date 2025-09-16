@@ -61,7 +61,6 @@ export default function CustomerChatting() {
     getRoomMessages,
     setRoomMessages,
     leaveRoom,
-    connectWebSocket,
   } = useWebSocket();
 
   // 현재 채팅방의 메시지들
@@ -318,28 +317,26 @@ export default function CustomerChatting() {
           </View>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity
+          <View
             style={[
               styles.connectionStatus,
-              { backgroundColor: connected ? "#4CAF50" : "#F44336" },
+              {
+                backgroundColor: connected
+                  ? "#4CAF50"
+                  : connectionStatus === "connecting"
+                  ? "#FF9800"
+                  : "#F44336",
+              },
             ]}
-            onPress={() => {
-              console.log("🔄 수동 재연결 버튼 클릭");
-              console.log("현재 상태:", { connected, connectionStatus });
-              if (!connected) {
-                console.log("🔄 수동 재연결 시도");
-                connectWebSocket();
-              }
-            }}
           >
             <Text style={styles.connectionText}>
               {connectionStatus === "connecting"
-                ? "연결중..."
+                ? "재연결 중..."
                 : connected
                 ? "연결됨"
-                : "탭하여 재연결"}
+                : "연결 끊김"}
             </Text>
-          </TouchableOpacity>
+          </View>
         </View>
       </View>
 

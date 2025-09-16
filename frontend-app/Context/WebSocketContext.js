@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { AppState } from "react-native";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import useLogin from "../Hook/useLogin";
@@ -26,10 +27,57 @@ export const WebSocketProvider = ({ children }) => {
 
   const clientRef = useRef(null);
   const subscriptionsRef = useRef(new Map()); // chatRoomId -> subscription
+  const reconnectTimeoutRef = useRef(null);
+  const appStateRef = useRef(AppState.currentState);
+  const isManualDisconnectRef = useRef(false); // 수동 연결 해제 플래그
+
+  // 자동 재연결 함수
+  const scheduleReconnect = useCallback(
+    (delay = 3000) => {
+      // 수동 해제된 경우 재연결 건너뛰기
+      if (isManualDisconnectRef.current) {
+        console.log("🚫 수동 해제 상태이므로 재연결 건너뛰기");
+        return;
+      }
+
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+
+      console.log(`🔄 ${delay / 1000}초 후 자동 재연결 예약`);
+      reconnectTimeoutRef.current = setTimeout(() => {
+        // 재연결 조건을 더 엄격하게 체크
+        if (
+          !isManualDisconnectRef.current &&
+          user &&
+          isLoggedIn &&
+          !connected &&
+          !clientRef.current?.connected
+        ) {
+          console.log("🔄 자동 재연결 시도...");
+          connectWebSocket();
+        } else {
+          console.log("🚫 재연결 조건 불만족 - 건너뛰기");
+        }
+      }, delay);
+    },
+    [user, isLoggedIn, connected, connectWebSocket]
+  );
 
   const disconnectWebSocket = useCallback((reason = "manual") => {
     console.log(`🔌 WebSocket 연결 해제 시도 (${reason})`);
     setLastDisconnectReason(reason);
+
+    // 수동 해제 플래그 설정 (로그아웃, unmount 등)
+    if (reason === "logout" || reason === "unmount" || reason === "manual") {
+      isManualDisconnectRef.current = true;
+    }
+
+    // 재연결 타이머 정리
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
 
     subscriptionsRef.current.forEach((sub) => {
       try {
@@ -74,15 +122,20 @@ export const WebSocketProvider = ({ children }) => {
       return;
     }
 
-    // 기존 클라이언트가 있다면 정리
+    // 수동 해제 플래그 초기화 (새로운 연결 시작)
+    isManualDisconnectRef.current = false;
+
+    // 기존 클라이언트가 있다면 조용히 정리
     if (clientRef.current) {
       console.log("🧹 기존 클라이언트 정리 중...");
       try {
-        clientRef.current.deactivate();
+        // 조용히 비활성화 (onDisconnect 이벤트 방지)
+        const oldClient = clientRef.current;
+        clientRef.current = null; // 먼저 참조 제거
+        oldClient.deactivate();
       } catch (e) {
         console.log("기존 클라이언트 정리 오류 (무시):", e.message);
       }
-      clientRef.current = null;
       setConnected(false);
     }
 
@@ -108,8 +161,8 @@ export const WebSocketProvider = ({ children }) => {
 
       const client = new Client({
         webSocketFactory: () => socket,
-        reconnectDelay: 3000, // 3초로 단축
-        connectionTimeout: 20000, // 20초로 증가
+        reconnectDelay: 2000, // 2초로 단축
+        connectionTimeout: 10000, // 10초로 단축 (더 빠른 반응)
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
         onConnect: (frame) => {
@@ -127,9 +180,25 @@ export const WebSocketProvider = ({ children }) => {
           );
           console.log("현재 user 상태:", user);
           console.log("현재 isLoggedIn 상태:", isLoggedIn);
+          console.log("수동 해제 여부:", isManualDisconnectRef.current);
+
+          // RECEIPT 메시지로 인한 disconnect는 무시
+          if (frame?.command === "RECEIPT") {
+            console.log("📋 RECEIPT로 인한 연결 해제 - 재연결 건너뛰기");
+            return;
+          }
+
           setConnected(false);
           setStompClient(null);
           setConnectionStatus("disconnected");
+
+          // 수동 해제가 아니고 로그인 상태일 때만 자동 재연결
+          if (!isManualDisconnectRef.current && user && isLoggedIn) {
+            console.log("📱 자동 연결 해제 감지 - 재연결 예약");
+            scheduleReconnect(3000);
+          } else {
+            console.log("🚫 재연결 건너뛰기 (수동 해제 또는 로그아웃)");
+          }
         },
         onStompError: (frame) => {
           console.error("❌ STOMP 오류:", frame);
@@ -174,8 +243,25 @@ export const WebSocketProvider = ({ children }) => {
         onWebSocketClose: (event) => {
           console.log("🔌 WebSocket 소켓 닫힘:", event.code, event.reason);
           console.log("정상 종료:", event.wasClean);
+          console.log("수동 해제 여부:", isManualDisconnectRef.current);
+
           setConnected(false);
           setConnectionStatus("disconnected");
+
+          // 수동 해제가 아닌 비정상 종료만 재연결
+          if (
+            !isManualDisconnectRef.current &&
+            event.code === 1006 &&
+            user &&
+            isLoggedIn
+          ) {
+            console.log("📱 비정상 연결 끊김 - 자동 재연결 예약");
+            // 앱이 활성 상태면 빠른 재연결, 아니면 일반 재연결
+            const delay = AppState.currentState === "active" ? 500 : 2000;
+            scheduleReconnect(delay);
+          } else {
+            console.log("🚫 정상 종료 또는 수동 해제 - 재연결 건너뛰기");
+          }
         },
         connectHeaders: headers,
         debug: (str) => {
@@ -380,6 +466,62 @@ export const WebSocketProvider = ({ children }) => {
     [stompClient, connected, user]
   );
 
+  // AppState 변경 감지로 포그라운드 복귀 시 즉시 재연결
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState) => {
+      console.log("📱 AppState 변경:", appStateRef.current, "→", nextAppState);
+
+      if (
+        appStateRef.current.match(/inactive|background/) &&
+        nextAppState === "active" &&
+        user &&
+        isLoggedIn
+      ) {
+        console.log("🚀 포그라운드 복귀 감지");
+        console.log("현재 연결 상태:", {
+          connected,
+          clientConnected: clientRef.current?.connected,
+        });
+
+        // 연결이 끊어져 있다면 즉시 재연결
+        if (!connected || !clientRef.current?.connected) {
+          console.log("🚀 연결 끊김 감지 - 모든 타이머 취소 후 즉시 재연결");
+
+          // 기존 재연결 타이머 즉시 취소
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+            reconnectTimeoutRef.current = null;
+          }
+
+          // 수동 해제 플래그 해제 (포그라운드 복귀는 자동 재연결 허용)
+          isManualDisconnectRef.current = false;
+
+          // 50ms 후 즉시 재연결 (UI 업데이트 후)
+          setTimeout(() => {
+            connectWebSocket();
+          }, 50);
+        } else {
+          console.log("✅ 이미 연결되어 있음 - 재연결 건너뛰기");
+        }
+      }
+
+      // 백그라운드로 갈 때 수동 해제 플래그 설정
+      if (nextAppState.match(/inactive|background/)) {
+        console.log("📱 백그라운드 진입 - 연결 유지 플래그 설정");
+        // 백그라운드 진입은 의도적 해제가 아님을 표시
+        isManualDisconnectRef.current = false;
+      }
+
+      appStateRef.current = nextAppState;
+    };
+
+    const subscription = AppState.addEventListener("change", handleAppStateChange);
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [user, isLoggedIn, connected, connectWebSocket]);
+
   useEffect(() => {
     if (user && isLoggedIn && !connected && !clientRef.current) {
       connectWebSocket();
@@ -392,6 +534,9 @@ export const WebSocketProvider = ({ children }) => {
   useEffect(() => {
     return () => {
       disconnectWebSocket("unmount");
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, [disconnectWebSocket]);
 
