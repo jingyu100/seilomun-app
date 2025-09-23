@@ -12,14 +12,15 @@ import {
 } from 'react-native';
 
 
-export default function TakeOut() {
+export default function PickUp() {
 
-    return (
-        <View>
-            
-
-            
-
-        </View>
-    )
+   return (
+      <View style= {styles.pickUpContainer}>
+            <View style= {styles.pickUpGap}>
+               <View>
+                     
+               </View>
+            </View>
+      </View>
+   )
 }

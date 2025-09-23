@@ -31,25 +31,51 @@ export default function ProductBottom() {
     };
 
     const decreaseQuantity = () => setQuantity(q => (q > 1 ? q - 1 : 1));
-
+    
+    // 바로 결제
     const handleBuyNow = () => {
+        // 결제페이지로 상품 데이터와 판매자 ID 전달
         navigation.navigate("Payment", {
-            productId: product.id,
-            name: product.name,
-            price: parsedDisPrice,
-            quantity: quantity,
-            totalPrice: totalPrice,
+            product: {
+                id: product.id,
+                sellerId: product.sellerId,
+                name: product.name,
+                productPhotoUrl: product.productPhotoUrl ? [product.productPhotoUrl] : [],
+                expiryDate: product.expiryDate,
+                originalPrice: Number(product.originalPrice) || 0,
+                discountPrice: parsedDisPrice,
+                currentDiscountRate: Number(product.currentDiscountRate) || 0,
+                quantity: quantity,
+                totalPrice: totalPrice,
+                stockQuantity: stockQuantity,
+            },
         });
     };
-
+    
+    // 장바구니 추가
     const handleAddCart = async () => {
         try {
+            console.log("🛒 장바구니 추가 요청:", {
+                id: product.id,
+                sellerId: product.sellerId,
+                name: product.name,
+                productPhotoUrl: product.productPhotoUrl,
+                expiryDate: product.expiryDate,
+                originalPrice: Number(product.originalPrice) || 0,
+                discountPrice: parsedDisPrice,
+                currentDiscountRate: Number(product.currentDiscountRate) || 0,
+                quantity: quantity,
+                totalPrice: totalPrice,
+                stockQuantity: stockQuantity,
+            });
+    
             Alert.alert(`${product.name} ${quantity}개 장바구니에 추가되었습니다.`);
         } catch (error) {
             console.error(error);
             Alert.alert("장바구니 추가 실패");
         }
     };
+    
 
     return (
         <View style={styles.prodBottom}>
