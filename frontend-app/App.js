@@ -26,7 +26,7 @@ export default function App() {
         <WebSocketProvider>
           <NavigationContainer>
             <Stack.Navigator
-              initialRouteName="Main"
+              initialRouteName="Login"
               screenOptions={{ headerShown: false }}
             >
               <Stack.Screen name="Login" component={LoginScreen} />
