@@ -184,11 +184,11 @@ const styles = StyleSheet.create({
       paddingHorizontal: 12,
    },
    qtyBtnText: {
-      fontSize: 22,
+      fontSize: 18,
       fontWeight: "400",
    },
    qtyText: {
-      fontSize: 18,
+      fontSize: 17,
    },
    qtyValue: {
       fontSize: 15,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
         zIndex: 1000,
     },
     totalPrice: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "bold",
         marginLeft: 'auto',
     },
