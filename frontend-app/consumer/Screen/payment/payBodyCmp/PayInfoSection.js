@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   minus: {
     fontSize: 16,
     marginRight: 4,
-    color: "#f00",
+    // color: "#f00",
   },
   pointInput: {
     backgroundColor: '#fff',
@@ -221,13 +221,14 @@ const styles = StyleSheet.create({
   finalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: 'center',
     marginTop: 12,
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: "#ccc",
   },
   finalLabel: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "500",
   },
   finalAmount: {

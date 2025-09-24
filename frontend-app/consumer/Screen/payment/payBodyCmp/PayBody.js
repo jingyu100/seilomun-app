@@ -19,11 +19,27 @@ import Delivery from './deliveryCmp/Delivery';
 import OrderItemsSection from './OrderItemsSection.js';
 import PayInfoSection from './PayInfoSection.js';
 import PayBottom from '../payBtmCmp/PayBottom.js';
+import PayResultModal from '../paymentResult/payResultModal.js';
 
 
 export default function PayBody() {
 
-    const route = useRoute();
+   const route = useRoute();
+
+	// 🆕 단일 상품과 장바구니 상품들을 모두 처리
+	const { 
+		product, 
+		products: cartProducts, 
+		fromCart, 
+		sellerId: directSellerId, 
+		result, 
+		paymentKey, 
+		orderId, 
+		amount, 
+		code, 
+		message 
+	} = route.params || {};
+
     const [seller, setSeller] = useState(null); // 통합된 판매자 정보
     const [activeTab, setActiveTab] = useState("delivery");
     const [pointsToUse, setPointsToUse] = useState(0)
@@ -71,18 +87,6 @@ export default function PayBody() {
     const [pickupInfo, setPickupInfo] = useState({
       pickupRequest: "",
     });
-  
-    // 🆕 단일 상품과 장바구니 상품들을 모두 처리
-    const { 
-        product, 
-        products: cartProducts, 
-        fromCart, 
-        sellerId: directSellerId, 
-        result, 
-        paymentKey, 
-        orderId, 
-        amount, code, message 
-    } = route.params || {};
   
     // 상품 배열 통합 처리
     const products = React.useMemo(() => {
@@ -261,75 +265,91 @@ export default function PayBody() {
     const isDeliveryAvailable = seller ? seller.deliveryAvailable === "Y" : false;
 
     return (
-        <View>
-            {/* 탭 영역 */}
-            <View style={styles.payHead_bottom}>
+		<SafeAreaView style={{ flex: 1 }}> {/* 전체 화면 차지 */}
+		  {/* 탭 영역 */}
+		  <StepTabs 
+			 activeTab={activeTab}
+			 onTabChange={handleTabChange}
+			 isDeliveryAvailable={isDeliveryAvailable}
+		  />
+	 
+		  <View style={styles.contentContainer}>
+				<ScrollView
+					style={styles.dlvContainer}
+					contentContainerStyle={[styles.dlvGap, { paddingBottom: 8 }]} // 버튼 높이 고려
+					showsVerticalScrollIndicator={false}
+				>
+					{/* 탭에 따른 컴포넌트 렌더링 */}
+					{activeTab === "delivery" && (
+					<Delivery
+						deliveryInfo={deliveryInfo}
+						setDeliveryInfo={setDeliveryInfo}
+					/>
+					)}
+					{activeTab === "pickup" && (
+					<PickUp
+						seller={seller}
+						pickupInfo={pickupInfo}
+						setPickupInfo={setPickupInfo}
+					/>
+					)}
+		
+					<OrderItemsSection products={products} deliveryFee={deliveryFee} />
+					<PayInfoSection
+						totalProductPrice={totalProductPrice}
+						deliveryFee={deliveryFee}
+						seller={seller}
+						isPickup={activeTab === "pickup"}
+						pointsToUse={pointsToUse}
+						setPointsToUse={setPointsToUse}
+						finalAmount={finalAmount}
+					/>
+			 </ScrollView>
+	 
+			 {/* 결제 버튼 */}
+			 <PayBottom 
+				products={products}
+				deliveryFee={deliveryFee}
+				isPickup={activeTab === "pickup"}
+				finalAmount={finalAmount}
+				deliveryInfo={deliveryInfo}
+				pickupInfo={pickupInfo}
+				pointsToUse={pointsToUse}
+				style={styles.payBottom}
+			 />
+		  </View>
 
-                <StepTabs 
-                    activeTab={activeTab}
-                    onTabChange={handleTabChange}
-                    isDeliveryAvailable={isDeliveryAvailable}
-                />
-                <ScrollView 
-                    style={styles.dlvContainer} 
-                    contentContainerStyle={styles.dlvGap}
-                    showsVerticalScrollIndicator={false} // 세로 스크롤바 숨김 (옵션)
-                >
-                        {/* 탭에 따른 컴포넌트 렌더링 */}
-                        {activeTab === "delivery" && (
-                        <Delivery
-                            deliveryInfo={deliveryInfo}
-                            setDeliveryInfo={setDeliveryInfo}
-                        />
-                        )}
-                        {activeTab === "pickup" && (
-                        <PickUp
-                            seller={seller}
-                            pickupInfo={pickupInfo}
-                            setPickupInfo={setPickupInfo}
-                        />
-                        )}
-                            
-                        <OrderItemsSection products={products} deliveryFee={deliveryFee} />
-                        <PayInfoSection
-                            totalProductPrice={totalProductPrice}
-                            deliveryFee={deliveryFee}
-                            seller={seller}
-                            isPickup={activeTab === "pickup"}
-                            pointsToUse={pointsToUse}
-                            setPointsToUse={setPointsToUse}
-                            finalAmount={finalAmount}
-                        />
-                </ScrollView>                
-            </View>
-
-            {/* 결제 버튼 */}
-            <PayBottom 
-                products={products}
-                deliveryFee={deliveryFee}
-                isPickup={activeTab === "pickup"}
-                finalAmount={finalAmount}
-                deliveryInfo={deliveryInfo}
-                pickupInfo={pickupInfo}
-                pointsToUse={pointsToUse}
-                style= {styles.payBottom}
-            />
-        </View>
-    )
+		  {/* ✨ 결제 결과 모달 */}
+		  {showResultModal && paymentResult && (
+          <PayResultModal
+              result={paymentResult}
+              onClose={() => {
+                setShowResultModal(false);
+                setPaymentResult(null);
+              }}
+          />
+      	)}
+		</SafeAreaView>
+	 );	 
 }
 
 
 const styles = StyleSheet.create({
+	contentContainer: {
+		flex: 1,
+		position: "relative",
+		backgroundColor: '#fff',
+	 },
     payHead_bottom: {
-
+		flexDirection: 'column',
     },
     dlvContainer: {
-        width: '100%',
-        // height: '100%',
-        backgroundColor: '#e3e3e3',
+		flex: 1,
+		width: '100%',
+		height: '100%',
+		backgroundColor: '#e3e3e3',
     },
     dlvGap: {
-        paddingBottom: 400,
         gap: 8,
     },
     payTabItem: {
@@ -357,7 +377,7 @@ const styles = StyleSheet.create({
       paddingBottom: 16,
     },
     payBottom: {
-        position: "absolute",
+        position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,

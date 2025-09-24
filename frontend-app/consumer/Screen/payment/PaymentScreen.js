@@ -31,8 +31,8 @@ export default function PaymentScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'column',
-
+        flex: 1,
+        backgroundColor: '#fff',
     },
     payHead: {
         position: 'static',
@@ -45,6 +45,6 @@ const styles = StyleSheet.create({
     },  
     payTitleTxt: {
         fontSize: 22,
-        fontWeight: 500,        
+        fontWeight: '500',        
     }
 })

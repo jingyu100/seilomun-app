@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
     StyleSheet,
     View,
@@ -37,11 +37,6 @@ export default function Delivery({
         {/* 배송지 */}
         <View style={styles.dlvContent}>
           <View style={styles.dlvMargin}>
-            {/* <DlvAddress
-              deliveryInfo={deliveryInfo}
-              setDeliveryInfo={setDeliveryInfo}
-            /> */}
-            {/* 배송지 */}
             <Text style={styles.dlvHeadLine}>배송지</Text>
 
             <View style= {styles.dlvAddress}>
@@ -64,7 +59,7 @@ export default function Delivery({
                 placeholder="기본주소를 입력하세요"
                 value={deliveryInfo.mainAddress}
                 onChangeText={(text) => handleInputChange('mainAddress', text)}
-                editable={false} // 주소 검색으로만 입력
+                editable={false}
               />
               <TextInput
                 style={styles.input}
@@ -76,7 +71,7 @@ export default function Delivery({
                 <Text style={styles.postCode}>우편번호: {deliveryInfo.postCode}</Text>
               ) : null}
 
-              {/* 휴대전화 입력 영역 */}
+              {/* 휴대전화 입력 */}
               <Text style={styles.addressLabel}>
                 휴대전화 <Text style={styles.required}>*</Text>
               </Text>
@@ -132,7 +127,11 @@ export default function Delivery({
                     styles.checkbox,
                     deliveryInfo.saveAsDefault && styles.checkedBox,
                   ]}
-                />
+                >
+                  {deliveryInfo.saveAsDefault && (
+                    <Text style={styles.checkmark}>✓</Text>
+                  )}
+                </View>
                 <Text style={styles.checkboxLabel}>기본 배송지로 저장</Text>
               </TouchableOpacity>
             </View>
@@ -140,7 +139,7 @@ export default function Delivery({
             {/* 주소검색 모달 */}
             <Modal visible={isPostcodeOpen} animationType="slide">
               <Postcode
-                style={{ flex: 1, marginTop: 50, }}
+                style={{ flex: 1, marginTop: 50 }}
                 jsOptions={{ animation: true }}
                 onSelected={(data) => {
                   setDeliveryInfo((prev) => ({
@@ -161,28 +160,6 @@ export default function Delivery({
 
           </View>
         </View>
-
-        {/* 주문 상품 */}
-        {/* <View style={styles.dlvContent}>
-          <View style={styles.dlvMargin}>
-            <OrderItemsSection products={products} deliveryFee={deliveryFee} />
-          </View>
-        </View> */}
-
-        {/* 결제 정보 */}
-        {/* <View style={styles.dlvContent}>
-          <View style={styles.dlvMargin}>
-            <PayInfoSection
-              totalProductPrice={totalProductPrice}
-              deliveryFee={deliveryFee}
-              seller={seller}
-              isPickup={false} // Delivery니까 픽업 아님
-              pointsToUse={pointsToUse}
-              setPointsToUse={setPointsToUse}
-              finalAmount={finalAmount}
-            />
-          </View>
-        </View> */}
     </View>
   );
 }
@@ -195,32 +172,40 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     marginVertical: 19,
   },
-
-    // 주소 부분
-    dlvHeadLine: { fontSize: 18, fontWeight: "600", marginBottom: 16 },
-    dlvAddress: {
-      flexDirection: 'column',
-      position: 'relative',
-      paddingVertical: 15,
-      paddingHorizontal: 10,
-      borderWidth: 0.5,
-      borderRadius: 8,
-      borderColor: '#ccc',
-      backgroundColor: '#f0f0f0',
-    },
-    addressSelector: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
-    addressLabel: { fontSize: 14, marginBottom: 6 },
-    required: { color: "red" },
-    addressSearchBtn: { backgroundColor: "#fff", padding: 8, borderRadius: 4, borderWidth: 1, borderColor: '#e0e0e0', },
-    addressSearchText: { fontSize: 12, color: "#333", },
-    input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 4, padding: 8, fontSize: 14, marginBottom: 8, backgroundColor: "#fff" },
-    postCode: { fontSize: 12, color: "#666", marginBottom: 12 },
-    phoneRow: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
-    phoneInput: { flex: 1, textAlign: "center" },
-    textArea: { borderWidth: 1, borderColor: "#ccc", borderRadius: 4, padding: 8, fontSize: 14, height: 80, backgroundColor: "#fff", marginBottom: 12 },
-    checkboxRow: { flexDirection: "row", alignItems: "center", },
-    checkbox: { width: 18, height: 18, borderWidth: 1, borderColor: "#ccc", marginRight: 5, borderRadius: 3, backgroundColor: '#fff', },
-    checkedBox: { backgroundColor: "#00c266" },
-    checkboxLabel: { fontSize: 13 },
-
+  dlvHeadLine: { fontSize: 18, fontWeight: "600", marginBottom: 16 },
+  dlvAddress: {
+    flexDirection: 'column',
+    position: 'relative',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderWidth: 0.5,
+    borderRadius: 8,
+    borderColor: '#ccc',
+    backgroundColor: '#f0f0f0',
+  },
+  addressSelector: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  addressLabel: { fontSize: 14, marginBottom: 6 },
+  required: { color: "red" },
+  addressSearchBtn: { backgroundColor: "#fff", padding: 8, borderRadius: 4, borderWidth: 1, borderColor: '#e0e0e0', },
+  addressSearchText: { fontSize: 12, color: "#333", },
+  input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 4, padding: 8, fontSize: 14, marginBottom: 8, backgroundColor: "#fff" },
+  postCode: { fontSize: 12, color: "#666", marginBottom: 12 },
+  phoneRow: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
+  phoneInput: { flex: 1, textAlign: "center" },
+  textArea: { borderWidth: 1, borderColor: "#ccc", borderRadius: 4, padding: 8, fontSize: 14, height: 80, backgroundColor: "#fff", marginBottom: 12 },
+  checkboxRow: { flexDirection: "row", alignItems: "center" },
+  checkbox: { 
+    width: 18, 
+    height: 18, 
+    borderWidth: 1, 
+    borderColor: "#ccc", 
+    marginRight: 5, 
+    borderRadius: 3, 
+    backgroundColor: '#fff', 
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkedBox: { backgroundColor: "#00c266" },
+  checkmark: { color: "#fff", fontSize: 14, fontWeight: "bold", lineHeight: 16 },
+  checkboxLabel: { fontSize: 13 },
 });

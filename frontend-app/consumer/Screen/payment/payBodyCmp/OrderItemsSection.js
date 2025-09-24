@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
   orderFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: 'center',
     marginTop: 16,
     borderTopWidth: 1,
     borderTopColor: "#ccc",

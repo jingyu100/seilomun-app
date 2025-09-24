@@ -145,10 +145,11 @@ export default function PayBottom({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
     borderTopWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#ccc",
     backgroundColor: "#fff",
+    paddingTop: 13,
+    paddingHorizontal: 18,
   },
   paymentSummary: {
     flexDirection: "row",
@@ -186,6 +187,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: {
+    textAlign: "center",
+    fontWeight: "600",
     fontSize: 16,
   },
 });
