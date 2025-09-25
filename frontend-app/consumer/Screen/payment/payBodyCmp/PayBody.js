@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import {
     StyleSheet,
     View,
@@ -19,26 +19,27 @@ import Delivery from './deliveryCmp/Delivery';
 import OrderItemsSection from './OrderItemsSection.js';
 import PayInfoSection from './PayInfoSection.js';
 import PayBottom from '../payBtmCmp/PayBottom.js';
-import PayResultModal from '../paymentResult/payResultModal.js';
-
+import PayResultModal from '../paymentResult/PayResultModal.js';
 
 export default function PayBody() {
 
    const route = useRoute();
 
-	// 🆕 단일 상품과 장바구니 상품들을 모두 처리
-	const { 
-		product, 
-		products: cartProducts, 
-		fromCart, 
-		sellerId: directSellerId, 
-		result, 
-		paymentKey, 
-		orderId, 
-		amount, 
-		code, 
-		message 
-	} = route.params || {};
+    // 🆕 단일 상품과 장바구니 상품들을 모두 처리
+    const { 
+      product, 
+      products: cartProducts, 
+      fromCart, 
+      sellerId: directSellerId, 
+      result, 
+      paymentKey, 
+      orderId, 
+      amount, 
+      code, 
+      message 
+    } = route.params || {};
+
+    const navigation = useNavigation();
 
     const [seller, setSeller] = useState(null); // 통합된 판매자 정보
     const [activeTab, setActiveTab] = useState("delivery");
@@ -315,6 +316,7 @@ export default function PayBody() {
 				deliveryInfo={deliveryInfo}
 				pickupInfo={pickupInfo}
 				pointsToUse={pointsToUse}
+				navigation={navigation}
 				style={styles.payBottom}
 			 />
 		  </View>

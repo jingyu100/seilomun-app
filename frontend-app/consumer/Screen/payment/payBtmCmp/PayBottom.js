@@ -1,48 +1,45 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { useNavigation } from "@react-navigation/native";
+import React, { useRef, useState } from "react";
 import {
-    StyleSheet,
-    View,
-    Text,
-    Animated,
-    Image,
-    ScrollView,
-    SafeAreaView,
-    TouchableOpacity,
-    Dimensions,
-    Alert,
-} from 'react-native';
-import api, { S3_BASE_URL } from '../../../../api/api.js';
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  Modal,
+  ActivityIndicator,
+} from "react-native";
+import { WebView } from "react-native-webview";
+import api from "../../../../api/api.js";
 
 export default function PayBottom({
-    roducts = [],
-    deliveryFee,
-    totalProductPrice,
-    isPickup = false,
-    finalAmount, // 부모에서 계산된 최종 금액
-    deliveryInfo, // ✨ 새로 추가: 배송 정보
-    pickupInfo, // ✨ 새로 추가: 픽업 정보
-    pointsToUse = 0, // ✨ 새로 추가: 사용할 포인트
+  products = [],
+  deliveryFee = 0,
+  totalProductPrice = 0,
+  isPickup = false,
+  finalAmount,
+  deliveryInfo = {},
+  pickupInfo = {},
+  pointsToUse = 0,
 }) {
-    
-    const navigation = useNavigation();
+  const [showWebView, setShowWebView] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState("");
+  const [loading, setLoading] = useState(false);
   const currentOrderIdRef = useRef(null);
 
-  // 최종 결제 금액 계산
   const calculatedFinalAmount =
     finalAmount || totalProductPrice + (isPickup ? 0 : deliveryFee);
 
-  // ✨ 유효성 검사
+  // 1️⃣ 주문 데이터 유효성 검사
   const validateOrderData = () => {
     if (!isPickup) {
-      if (!deliveryInfo?.mainAddress?.trim()) {
+      if (!deliveryInfo.mainAddress?.trim()) {
         Alert.alert("안내", "배송 주소를 입력해주세요.");
         return false;
       }
       if (
-        !deliveryInfo.phoneFirst ||
-        !deliveryInfo.phoneMiddle ||
-        !deliveryInfo.phoneLast
+        !deliveryInfo.phoneFirst?.trim() ||
+        !deliveryInfo.phoneMiddle?.trim() ||
+        !deliveryInfo.phoneLast?.trim()
       ) {
         Alert.alert("안내", "휴대전화 번호를 모두 입력해주세요.");
         return false;
@@ -51,144 +48,149 @@ export default function PayBottom({
     return true;
   };
 
+  // 2️⃣ 결제 버튼 클릭
   const handlePaymentClick = async () => {
     try {
       if (!validateOrderData()) return;
-
       if (!products || products.length === 0) {
         Alert.alert("안내", "주문할 상품이 없습니다.");
         return;
       }
 
-      // 주문명 생성
+      setLoading(true);
+
       const firstProduct = products[0];
       const orderName =
         products.length === 1
           ? `${firstProduct.name} ${firstProduct.quantity || 1}개`
           : `${firstProduct.name} 외 ${products.length - 1}건`;
 
-      // 주문 데이터
+      // 서버로 보낼 주문 데이터
       const orderData = {
-        usedPoints: pointsToUse || 0,
+        usedPoints: Number(pointsToUse),
         memo: isPickup
-          ? pickupInfo?.pickupRequest || "픽업 주문"
-          : deliveryInfo?.deliveryRequest || "배송 주문",
+          ? pickupInfo.pickupRequest || "픽업 주문"
+          : deliveryInfo.deliveryRequest || "배송 주문",
         isDelivery: isPickup ? "N" : "Y",
         deliveryAddress: isPickup
           ? "매장 픽업"
-          : `${deliveryInfo.mainAddress} ${deliveryInfo.detailAddress}`.trim(),
-        orderProducts: products.map((product) => ({
-          productId: product.id || product.productId,
-          quantity: product.quantity || 1,
-          price: product.discountPrice || product.originalPrice,
-          currentDiscountRate: product.currentDiscountRate || 0,
+          : `${deliveryInfo.mainAddress || ""} ${deliveryInfo.detailAddress || ""}`.trim(),
+        orderProducts: products.map((p) => ({
+          productId: Number(p.id || p.productId),
+          quantity: Number(p.quantity || 1),
+          price: Number(p.discountPrice || p.originalPrice),
+          currentDiscountRate: Number(p.currentDiscountRate || 0),
         })),
         payType: "CARD",
-        orderName: orderName,
-        yourSuccessUrl: "http://localhost:3000/payment?result=success", // RN에서는 WebView success 처리 필요
-        yourFailUrl: "http://localhost:3000/payment?result=fail",
+        orderName,
       };
 
-      console.log("📦 주문 데이터:", orderData);
+      console.log("📦 서버로 보낼 주문 데이터:", orderData);
 
-      const response = await api.post("/api/orders/buy", orderData, {
+      // 2-1️⃣ 서버 호출: 결제 URL 생성
+      const response = await api.post("/api/orders/pay/native", orderData, {
         headers: { "Content-Type": "application/json" },
       });
 
-      const paymentData = response.data?.data?.Update;
-      if (!paymentData) {
-        throw new Error("서버에서 결제 정보를 받지 못했습니다.");
+      const { paymentUrl, orderId } = response.data?.data || {};
+      if (!paymentUrl || !orderId) {
+        throw new Error("서버에서 결제 URL을 받지 못했습니다.");
       }
 
-      currentOrderIdRef.current = paymentData.orderId;
-      console.log("💾 Order ID:", paymentData.orderId);
-
-      // ✅ 여기서 TossPayments 결제창을 띄워야 함
-      // → React Native에서는 WebView 또는 서버 연동 방식 필요
-      Alert.alert("결제 진행", `결제 금액: ${calculatedFinalAmount}원`);
+      currentOrderIdRef.current = orderId;
+      setPaymentUrl(paymentUrl);
+      setShowWebView(true);
     } catch (error) {
-      console.error("❌ 결제 처리 실패:", error);
-      Alert.alert("에러", error.message || "결제 처리 중 오류가 발생했습니다.");
+      console.error("❌ 결제 처리 실패:", error.response?.data || error.message);
+      Alert.alert("결제 실패", error.message || "오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    Alert.alert(
-      "안내",
-      "결제를 취소하고 이전 페이지로 돌아가시겠습니까?",
-      [
-        { text: "아니오" },
-        { text: "예", onPress: () => navigation.goBack() }
-      ]
-    );
+  // 3️⃣ WebView 메시지 수신
+  const handleWebViewMessage = async (event) => {
+    const data = event.nativeEvent.data;
+    console.log("💬 WebView 메시지:", data);
+
+    if (!currentOrderIdRef.current) return;
+
+    try {
+      if (data === "success") {
+        Alert.alert("결제 완료", "결제가 성공적으로 완료되었습니다.");
+      } else if (data === "fail" || data === "cancel") {
+        Alert.alert("결제 취소", "결제가 취소되었습니다.");
+      }
+
+      // 공통: 결제 종료 처리
+      await api.post(`/api/orders/close-payment/${currentOrderIdRef.current}`);
+      currentOrderIdRef.current = null;
+    } catch (err) {
+      console.error("❌ close-payment 처리 실패:", err);
+    } finally {
+      setShowWebView(false);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.paymentSummary}>
-        <Text style={styles.label}>TOTAL</Text>
-        <Text style={styles.finalAmount}>
-          {calculatedFinalAmount.toLocaleString()}원
-        </Text>
+    <>
+      <View style={styles.container}>
+        <View style={styles.summary}>
+          <Text style={styles.label}>총 결제 금액</Text>
+          <Text style={styles.amount}>{calculatedFinalAmount.toLocaleString()}원</Text>
+        </View>
+
+        <View style={styles.buttons}>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => Alert.alert("취소", "이전 화면으로 돌아갑니다.")}
+          >
+            <Text>취소</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.payButton}
+            onPress={handlePaymentClick}
+            disabled={loading}
+          >
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#fff" }}>결제하기</Text>}
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.buttonGroup}>
-        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-          <Text style={styles.buttonText}>취소하기</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.submitButton} onPress={handlePaymentClick}>
-          <Text style={[styles.buttonText, { color: "#fff" }]}>결제하기</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+
+      {/* WebView 모달 */}
+      <Modal visible={showWebView} animationType="slide">
+        <WebView
+          source={{ uri: paymentUrl }}
+          onMessage={handleWebViewMessage}
+          startInLoadingState
+          renderLoading={() => <ActivityIndicator style={{ flex: 1 }} size="large" />}
+        />
+      </Modal>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    paddingTop: 13,
-    paddingHorizontal: 18,
-  },
-  paymentSummary: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 14,
-  },
-  label: {
-    color: "#333",
-  },
-  finalAmount: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 'auto',
-    color: "#000",
-  },
-  buttonGroup: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
+  container: { padding: 16, backgroundColor: "#fff" },
+  summary: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  label: { fontSize: 16 },
+  amount: { fontSize: 18, fontWeight: "bold" },
+  buttons: { flexDirection: "row", justifyContent: "space-between" },
   cancelButton: {
     flex: 1,
     padding: 12,
-    marginRight: 8,
     borderWidth: 1,
     borderColor: "#888",
     borderRadius: 6,
     alignItems: "center",
+    marginRight: 8,
   },
-  submitButton: {
+  payButton: {
     flex: 1,
     padding: 12,
-    backgroundColor: "#000",
     borderRadius: 6,
+    backgroundColor: "#000",
     alignItems: "center",
-  },
-  buttonText: {
-    textAlign: "center",
-    fontWeight: "600",
-    fontSize: 16,
   },
 });
