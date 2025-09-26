@@ -16,11 +16,14 @@ import CustomerRegisterScreen from "./consumer/Screen/Login/CustomerRegisterScre
 import CustomerSettingsScreen from "./consumer/Screen/UserSettings/CustomerSettingsScreen";
 import CustomerChatting from "./consumer/Screen/chatting/CustomerChatting";
 import ChatRoomList from "./consumer/Screen/chatting/ChatRoomList";
+import ProductScreen from "./consumer/Screen/Product/ProductScreen.js";
+import PaymentScreen from "./consumer/Screen/payment/PaymentScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
+
     <LoginProvider>
       <ChatRoomsProvider>
         <WebSocketProvider>
@@ -33,7 +36,10 @@ export default function App() {
               <Stack.Screen name="Main" component={MainScreen} />
               <Stack.Screen name="CustomerLogin" component={CustomerLoginScreen} />
               <Stack.Screen name="SellerLogin" component={SellerLoginScreen} />
-              <Stack.Screen name="Store" component={StoreScreen} />
+              {/* 나중에 initialParams={{ sellerId: 1 }} 이거 지우기 */}
+              <Stack.Screen name="Store" component={StoreScreen} initialParams={{ sellerId: 1 }} />
+              <Stack.Screen name="Product" component={ProductScreen} />
+              <Stack.Screen name="Payment" component={PaymentScreen} />
               <Stack.Screen name="CustomerRegister" component={CustomerRegisterScreen} />
               <Stack.Screen name="CustomerSettings" component={CustomerSettingsScreen} />
               <Stack.Screen name="ChatRoomList" component={ChatRoomList} />
