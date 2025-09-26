@@ -35,3 +35,15 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+
+# JetBrains IDE
+.idea/
+*.iml
+
+# Node/Expo
+node_modules/
+.expo/
+dist/
+build/
+.env
