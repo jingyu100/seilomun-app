@@ -11,6 +11,7 @@ import LoginScreen from "./Main_Login/LoginScreen";
 import MainScreen from "./consumer/Screen/MainScreen";
 import CustomerLoginScreen from "./consumer/Screen/Login/CustomerLoginScreen";
 import SellerLoginScreen from "./Seller/Screen/SellerLoginScreen";
+import SellerBusinessNumberScreen from "./Seller/Screen/SellerBusinessNumberScreen";
 import StoreScreen from "./consumer/Screen/Store/StoreScreen";
 import CustomerRegisterScreen from "./consumer/Screen/Login/CustomerRegisterScreen";
 import CustomerSettingsScreen from "./consumer/Screen/UserSettings/CustomerSettingsScreen";
@@ -36,6 +37,7 @@ export default function App() {
               <Stack.Screen name="Main" component={MainScreen} />
               <Stack.Screen name="CustomerLogin" component={CustomerLoginScreen} />
               <Stack.Screen name="SellerLogin" component={SellerLoginScreen} />
+              <Stack.Screen name="SellerBusinessNumberScreen" component={SellerBusinessNumberScreen} />
               {/* 나중에 initialParams={{ sellerId: 1 }} 이거 지우기 */}
               <Stack.Screen name="Store" component={StoreScreen} initialParams={{ sellerId: 1 }} />
               <Stack.Screen name="Product" component={ProductScreen} />
