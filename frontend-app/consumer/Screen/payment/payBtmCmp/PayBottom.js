@@ -101,7 +101,14 @@ export default function PayBottom({
       setPaymentUrl(paymentUrl);
       setShowWebView(true);
     } catch (error) {
-      console.error("❌ 결제 처리 실패:", error.response?.data || error.message);
+      const errorDetails = error.response?.data
+        ? `서버 응답 데이터: ${JSON.stringify(error.response.data)}`
+        : error.message;
+
+      console.error("❌ 결제 처리 실패:", error); // 전체 에러 객체를 출력하여 디버깅 도구에서 확인
+      console.error("❌ 상세 에러:", errorDetails); // 상세 내용을 문자열로 출력
+
+      // 사용자에게는 일반적인 오류 메시지를 제공
       Alert.alert("결제 실패", error.message || "오류가 발생했습니다.");
     } finally {
       setLoading(false);
