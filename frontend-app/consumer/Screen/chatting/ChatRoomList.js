@@ -37,10 +37,10 @@ export default function ChatRoomList() {
   const handleChatRoomPress = (chatRoom) => {
     console.log("📋 채팅방 선택:", chatRoom);
     navigation.navigate("CustomerChatting", {
-      sellerId: chatRoom.sellerId,
-      sellerStoreName: chatRoom.sellerStoreName,
-      chatRoomId: chatRoom.chatRoomId,
-      customerId: chatRoom.customerId,
+        chatRoomId: chatRoom.chatRoomId,      // (위 1)로 이제 정상 값
+        sellerId: chatRoom.sellerId,
+        customerId: chatRoom.customerId,      // 판매자일 때 필요
+        sellerStoreName: chatRoom.sellerStoreName,
     });
   };
 
