@@ -1,6 +1,6 @@
 // frontend-app/Seller/Screen/SellerLoginScreen.js
 import React, { useState } from "react";
-<<<<<<< HEAD
+
 import { useNavigation } from "@react-navigation/native";
 import {
     View,
@@ -11,13 +11,6 @@ import {
     Alert,
     ActivityIndicator,
 } from "react-native";
-=======
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // useNavigation 훅 임포트
-<<<<<<< Updated upstream
-=======
->>>>>>> f1fa0b29553ab930642d94d4bfe30c5fb6336c3a
->>>>>>> Stashed changes
 import styles from "../Style/SellerLoginStyle";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -26,21 +19,11 @@ import api from "../../api/api";
 import useLogin from "../../Hook/useLogin";
 
 export default function SellerLoginScreen() {
-<<<<<<< HEAD
+
     // 🔸 DTO에 맞춰 'email', 'password' 로 명명합니다.
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
-=======
-  const [id, setId] = useState("");
-  const [password, setPassword] = useState("");
-  
-  // useNavigation 훅을 통해 navigation 객체를 사용합니다.
-  const navigation = useNavigation();
-<<<<<<< Updated upstream
-=======
->>>>>>> f1fa0b29553ab930642d94d4bfe30c5fb6336c3a
->>>>>>> Stashed changes
 
     const navigation = useNavigation();
     const { setIsLoggedIn, setUser, isLoading } = useLogin();
@@ -63,7 +46,7 @@ export default function SellerLoginScreen() {
                 userType: "SELLER",
             });
 
-<<<<<<< HEAD
+
             // ApiResponseJson 규격: { data: {...} } 또는 바로 본문
             const data = loginRes?.data?.data ?? loginRes?.data ?? {};
             const accessToken = data?.accessToken;
@@ -165,19 +148,5 @@ export default function SellerLoginScreen() {
             </View>
         </View>
     );
-=======
-      <View style={styles.footerLinks}>
-        <Text style={styles.footerText}>아이디 찾기</Text>
-        <Text style={styles.footerDot}>|</Text>
-        <Text style={styles.footerText}>비밀번호 찾기</Text>
-        <Text style={styles.footerDot}>|</Text>
 
-        {/* 회원가입 버튼 클릭 시 SellerBusinessNumberScreen으로 이동 */}
-        <TouchableOpacity onPress={() => navigation.navigate("SellerBusinessNumberScreen")}>
-        <Text style={styles.footerText}>회원가입</Text>
-      </TouchableOpacity>
-      </View>
-    </View>
-  );
->>>>>>> f1fa0b29553ab930642d94d4bfe30c5fb6336c3a
 }
