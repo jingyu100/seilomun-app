@@ -1,14 +1,21 @@
 import React, { useRef } from 'react';
-import { View, Text, Animated, Image, ScrollView, SafeAreaView, } from 'react-native';
+import { View, Text, Animated, Image, ScrollView, SafeAreaView, Alert } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
 import useStoreInfo from "../../../Hook/useStoreInfo.js";
 import styles from './StoreStyle.js';
 import Header from '../Header/Header.js';
 import BottomTab from '../BottomTab/BottomTab.js';
 import StoreHead from "./StoreComponents/StoreHead.js";
+import { useChatRooms } from "../../../Context/ChatRoomsContext";
+import useLogin from "../../../Hook/useLogin";
 
 export default function StoreScreen() {
-    
+
     const { store, sellerId } = useStoreInfo();
+    const navigation = useNavigation();
+    const { user, isLoggedIn } = useLogin();
+    const { chatRooms } = useChatRooms();
+
 
     const sellerInformationDto = store?.sellerInformationDto;
     const storeImages = sellerInformationDto?.sellerPhotoUrls;
@@ -28,18 +35,42 @@ export default function StoreScreen() {
         extrapolate: 'clamp',
     });
 
+    const handleOpenChat = () => {
+        if (!isLoggedIn) {
+            Alert.alert("로그인 필요", "채팅을 시작하려면 로그인이 필요합니다.", [
+                { text: "취소", style: "cancel" },
+                { text: "로그인", onPress: () => navigation.navigate("CustomerLogin") }
+            ]);
+            return;
+        }
+
+        if (user?.userType === 'SELLER' && user?.id === sellerId) {
+            Alert.alert("안내", "자신과는 채팅할 수 없습니다.");
+            return;
+        }
+
+        // 판매자와의 기존 채팅방 확인
+        const existingRoom = chatRooms.find(room => String(room.sellerId) === String(sellerId));
+
+        if (existingRoom) {
+            // 기존 채팅방이 있으면 바로 이동
+            navigation.navigate("CustomerChatting", {
+                chatRoomId: existingRoom.chatRoomId,
+                sellerId: existingRoom.sellerId,
+                sellerStoreName: existingRoom.sellerStoreName,
+            });
+        } else {
+            // 없으면, CustomerChatting 화면으로 이동하여 새로 생성
+            navigation.navigate("CustomerChatting", {
+                sellerId: sellerId,
+                sellerStoreName: sellerInformationDto?.storeName || '상점',
+            });
+        }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <Header />
-            {/* <Image 
-                source={
-                    storeImages && storeImages.length > 0
-                        ? { uri: storeImages[0] }
-                        : require('../../../assets/noImage.jpg')
-                }
-                 style={styles.storeImage}
-                 resizeMode="cover" // object-fit: cover 대체용
-            /> */}
             <Animated.Image
                 source={
                     storeImages && storeImages.length > 0
@@ -57,31 +88,31 @@ export default function StoreScreen() {
                 ]}
                 resizeMode="cover"
             />
-                 
-                <Animated.ScrollView
-                    style={styles.storeUI}
-                    onScroll={Animated.event(
-                        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                        { useNativeDriver: false }
-                    )}
-                    scrollEventThrottle={16}
-                >
-                    <View style={{ backgroundColor: '#fff', }}>
-                        <View style={styles.storeMargin}>
-                            <StoreHead
-                                testID='storeHead'
-                                store={store}
-                                sellerId={sellerId}
-                                // onOpenChat={handleOpenChat}
-                            />
 
-                            <View testID="storeBdoy">
-                                {/* 여기에 리뷰, 기타 내용이 추가되면 다 보여짐 */}
-                                
-                            </View>
+            <Animated.ScrollView
+                style={styles.storeUI}
+                onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                    { useNativeDriver: false }
+                )}
+                scrollEventThrottle={16}
+            >
+                <View style={{ backgroundColor: '#fff', }}>
+                    <View style={styles.storeMargin}>
+                        <StoreHead
+                            testID='storeHead'
+                            store={store}
+                            sellerId={sellerId}
+                            onOpenChat={handleOpenChat}
+                        />
+
+                        <View testID="storeBdoy">
+                            {/* 여기에 리뷰, 기타 내용이 추가되면 다 보여짐 */}
+
                         </View>
                     </View>
-                </Animated.ScrollView>
+                </View>
+            </Animated.ScrollView>
             <BottomTab />
         </SafeAreaView>
     )

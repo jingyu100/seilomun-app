@@ -1,27 +1,16 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React from 'react';
+import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from '../../StoreStyle.js';
 
-
-const TabItem = ({ icon, label, focused }) => (
-    <TouchableOpacity style={styles.tabItem}>
-      <Ionicons 
-        name={icon} 
-        size={21}
-        color={focused ? "black" : "black"} 
-        style= {{
-            
-        }}
-    />
-    </TouchableOpacity>
-);
-
-export default function FavoriteButtonBox() {
-    
+export default function Inquiry({ onOpenChat }) {
     return (
-        <View>
-            <TabItem icon="chatbubble-outline" />
-        </View>
-    )
+        <TouchableOpacity style={styles.tabItem} onPress={onOpenChat}>
+            <Ionicons
+                name="chatbubble-outline"
+                size={21}
+                color={"black"}
+            />
+        </TouchableOpacity>
+    );
 }
