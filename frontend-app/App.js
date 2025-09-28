@@ -32,7 +32,7 @@ export default function App() {
           <ChatRoomsProvider>
             <NavigationContainer>
               <Stack.Navigator
-                  initialRouteName="SellerLogint"
+                  initialRouteName="SellerLogin"
                   screenOptions={{ headerShown: false }}
               >
                 <Stack.Screen name="Login" component={LoginScreen} />
