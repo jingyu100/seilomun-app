@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,14 @@ import {
   StyleSheet,
   Modal,
   ActivityIndicator,
+  Platform,
+  Linking,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import api from "../../../../api/api.js";
 
 const CLIENT_KEY = "test_ck_AQ92ymxN341KPlO15vDvVajRKXvd";
-const APP_SCHEME = "myapp"; // ✅ 필요시 변경
+const APP_SCHEME = "myapp"; // iOS/Android URL scheme 등록 필요(Info.plist/AndroidManifest)
 const SUCCESS_URL = `${APP_SCHEME}://payment/success`;
 const FAIL_URL = `${APP_SCHEME}://payment/fail`;
 
@@ -27,17 +29,18 @@ export default function PayBottom({
   pointsToUse = 0,
 }) {
   const [showWebView, setShowWebView] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState(""); // 서버가 주는 URL(있으면 사용)
-  const [paymentHtml, setPaymentHtml] = useState(""); // 서버 URL 없을 때 대체용 HTML
+  const [paymentUrl, setPaymentUrl] = useState(""); // 서버가 주면 그대로 사용
+  const [paymentHtml, setPaymentHtml] = useState(""); // 서버 URL 없으면 클라에서 생성
   const [loading, setLoading] = useState(false);
+
   const webviewRef = useRef(null);
-  const currentOrderIdRef = useRef(null);     // 서버 주문 PK(정리용)
-  const currentTxnIdRef = useRef(null);       // Toss 결제용 orderId
+  const currentOrderIdRef = useRef(null); // 서버 주문 PK(정리용)
+  const currentTxnIdRef = useRef(null);   // Toss 결제용 orderId
 
   const calculatedFinalAmount =
     finalAmount || totalProductPrice + (isPickup ? 0 : deliveryFee);
 
-  // 간단 유효성 검사
+  // 간단 유효성
   const validateOrderData = () => {
     if (!isPickup) {
       if (!deliveryInfo.mainAddress?.trim()) {
@@ -60,7 +63,7 @@ export default function PayBottom({
     return true;
   };
 
-  // RN ↔ WebView 통신을 위한 안전한 문자열 변환
+  // HTML 인젝션 대비
   const escapeHtml = (s = "") =>
     String(s)
       .replace(/&/g, "&amp;")
@@ -69,7 +72,7 @@ export default function PayBottom({
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
 
-  // 서버 URL이 없을 때 사용할 결제 HTML (토스 JS SDK 직접 호출)
+  // 서버 URL 없을 때 사용할 결제 HTML (Toss JS SDK)
   const buildPaymentHTML = ({ clientKey, orderId, orderName, amount }) => {
     const safeName = escapeHtml(orderName);
     return `
@@ -77,10 +80,7 @@ export default function PayBottom({
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
   <title>Toss Payment</title>
   <script src="https://js.tosspayments.com/v1"></script>
   <style>
@@ -95,8 +95,7 @@ export default function PayBottom({
   </div>
   <script>
     (function(){
-      const clientKey='${clientKey}';
-      const tossPayments = TossPayments(clientKey);
+      const tossPayments = TossPayments('${clientKey}');
       const params = {
         amount: ${Number(amount)},
         orderId: '${orderId}',
@@ -106,24 +105,24 @@ export default function PayBottom({
         successUrl: '${SUCCESS_URL}',
         failUrl: '${FAIL_URL}',
       };
-
       function go(){
         tossPayments.requestPayment('CARD', params).catch(function(e){
-          // 유저 취소/파라미터 오류 등
           if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({ type:'ERROR', code: e.code || e.name, message: e.message }));
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+              type:'ERROR',
+              code: e.code || e.name,
+              message: e.message
+            }));
           }
         });
       }
-
       document.getElementById('pay').addEventListener('click', go);
-      // 자동 시작 원하면 아래 주석 해제
+      // 자동 실행 원하면 아래 주석 해제
       // go();
     })();
   </script>
 </body>
-</html>
-`;
+</html>`;
   };
 
   // 결제 버튼
@@ -138,7 +137,7 @@ export default function PayBottom({
           ? `${first.name} ${first.quantity || 1}개`
           : `${first.name} 외 ${products.length - 1}건`;
 
-      // 1) 서버에 주문 생성
+      // 1) 서버 주문 생성
       const orderData = {
         usedPoints: Number(pointsToUse) || 0,
         memo: isPickup
@@ -163,9 +162,9 @@ export default function PayBottom({
         headers: { "Content-Type": "application/json" },
       });
 
-      // 서버가 주는 형태 모두 대응
+      // 서버 응답 다양한 형태 대응
       const data = resp.data?.data?.Update || resp.data?.data || {};
-      const realOrderId = data.orderId || data.id;                 // 서버 주문 PK
+      const realOrderId = data.orderId || data.id; // 서버 주문 PK
       const txnId = data.transactionId || data.tossOrderId || realOrderId; // Toss 결제용 orderId
       const amount = Number(data.amount ?? orderData.amount);
       const name = data.orderName || orderData.orderName;
@@ -177,7 +176,7 @@ export default function PayBottom({
       currentOrderIdRef.current = realOrderId;
       currentTxnIdRef.current = String(txnId);
 
-      // 2-A) 서버가 결제 URL을 주는 경우 그대로 사용
+      // 2-A) 서버가 결제 URL을 주는 경우
       if (data.paymentUrl) {
         setPaymentUrl(String(data.paymentUrl));
         setPaymentHtml("");
@@ -185,7 +184,7 @@ export default function PayBottom({
         return;
       }
 
-      // 2-B) 서버 URL이 없으면, 클라이언트 키로 HTML 생성해서 WebView 로드
+      // 2-B) 서버 URL이 없으면 클라에서 HTML 생성
       const html = buildPaymentHTML({
         clientKey: CLIENT_KEY,
         orderId: String(txnId),
@@ -204,7 +203,7 @@ export default function PayBottom({
   };
 
   // WebView → RN 메시지
-  const handleWebViewMessage = async (event) => {
+  const handleWebViewMessage = (event) => {
     try {
       const msg = JSON.parse(event.nativeEvent.data || "{}");
       if (msg?.type === "ERROR") {
@@ -214,56 +213,85 @@ export default function PayBottom({
           Alert.alert("결제 실패", msg.message || "오류가 발생했습니다.");
         }
         // 취소/오류에도 서버 정리(선택)
-        if (currentOrderIdRef.current) {
-          try {
-            await api.post(`/api/orders/close-payment/${currentOrderIdRef.current}`);
-          } catch {}
-          currentOrderIdRef.current = null;
-          currentTxnIdRef.current = null;
-        }
+        const orderId = currentOrderIdRef.current;
+        currentOrderIdRef.current = null;
+        currentTxnIdRef.current = null;
         setShowWebView(false);
+        if (orderId) {
+          setTimeout(() => {
+            api.post(`/api/orders/close-payment/${orderId}`).catch(() => {});
+          }, 0);
+        }
       }
     } catch {}
   };
 
-  // 성공/실패 딥링크 URL 가로채기
-  // ✅ 동기 함수: 반드시 boolean을 즉시 반환
+  // ✅ 반드시 동기 반환(Boolean). 외부 스킴/딥링크/마켓 처리 포함.
   const handleShouldStart = (req) => {
     const url = req?.url ?? "";
 
-    if (url.startsWith(SUCCESS_URL) || url.startsWith(FAIL_URL)) {
-      // 사용자 피드백
-      if (url.startsWith(SUCCESS_URL)) {
-        Alert.alert("결제 완료", "결제가 성공적으로 완료되었습니다.");
-      } else {
-        Alert.alert("결제 실패", "결제가 취소되었거나 실패했습니다.");
-      }
+    // 0) 토스 앱 스킴 직접 열기
+    if (url.startsWith("supertoss://")) {
+      Linking.openURL(url).catch(() => {});
+      return false;
+    }
 
-      // 모달 닫기 & 레퍼런스 정리 (동기)
+    // 1) intent 스킴 → 앱 스킴 변환 후 열기, 미설치 시 마켓
+    if (url.startsWith("intent://")) {
+      try {
+        const scheme = (url.match(/#Intent;scheme=([^;]+);/) || [])[1]; // 예: supertoss
+        const path = url.replace("intent://", "").split("#Intent;")[0]; // 예: pay?payToken=...
+        const appUrl = `${scheme}://${path}`; // supertoss://pay?payToken=...
+
+        Linking.openURL(appUrl).catch(() => {
+          const pkg = (url.match(/;package=([^;]+);/) || [])[1]; // viva.republica.toss
+          if (pkg && Platform.OS === "android") {
+            const market = `market://details?id=${pkg}`;
+            Linking.openURL(market).catch(() => {
+              Linking.openURL(`https://play.google.com/store/apps/details?id=${pkg}`).catch(() => {});
+            });
+          }
+        });
+      } catch {
+        // 파싱 실패해도 WebView 로딩 막기
+      }
+      return false;
+    }
+
+    // 2) 마켓 스킴 처리
+    if (url.startsWith("market://")) {
+      Linking.openURL(url).catch(() => {});
+      return false;
+    }
+
+    // 3) 성공/실패 딥링크 처리
+    if (url.startsWith(SUCCESS_URL) || url.startsWith(FAIL_URL)) {
       const orderId = currentOrderIdRef.current;
       currentOrderIdRef.current = null;
       setShowWebView(false);
 
-      // 서버 정리는 비동기로 뒤에서 처리 (fire-and-forget)
       setTimeout(() => {
+        if (url.startsWith(SUCCESS_URL)) {
+          Alert.alert("결제 완료", "결제가 성공적으로 완료되었습니다.");
+        } else {
+          Alert.alert("결제 실패", "결제가 취소되었거나 실패했습니다.");
+        }
         if (orderId) {
-          api.post(`/api/orders/close-payment/${orderId}`).catch((e) => {
-            console.warn("close-payment 실패:", e?.response?.data || e?.message);
-          });
+          api.post(`/api/orders/close-payment/${orderId}`).catch(() => {});
         }
       }, 0);
 
-      return false; // ✅ WebView 로딩 막기 (반드시 boolean)
+      return false;
     }
 
-    return true; // ✅ 그 외 URL은 계속 로딩
+    // 그 외는 그대로 로드
+    return true;
   };
-
 
   return (
     <>
       <View style={styles.container}>
-        <View className="summary" style={styles.summary}>
+        <View style={styles.summary}>
           <Text style={styles.label}>총 결제 금액</Text>
           <Text style={styles.amount}>{calculatedFinalAmount.toLocaleString()}원</Text>
         </View>
@@ -291,17 +319,21 @@ export default function PayBottom({
       </View>
 
       {/* WebView 모달 */}
-      <Modal visible={showWebView} animationType="slide" onRequestClose={() => setShowWebView(false)}>
+      <Modal
+        visible={showWebView}
+        animationType="slide"
+        onRequestClose={() => setShowWebView(false)}
+      >
         <WebView
           ref={webviewRef}
           source={
             paymentUrl
-              ? { uri: paymentUrl }                 // 서버 제공 URL 그대로
+              ? { uri: paymentUrl } // 서버 제공 URL
               : { html: paymentHtml, baseUrl: "https://localhost" } // 클라 생성 HTML
           }
           onMessage={handleWebViewMessage}
           onShouldStartLoadWithRequest={handleShouldStart}
-          originWhitelist={['*']}
+          originWhitelist={["*"]}
           javaScriptEnabled
           domStorageEnabled
           startInLoadingState
