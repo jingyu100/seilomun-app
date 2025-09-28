@@ -227,32 +227,38 @@ export default function PayBottom({
   };
 
   // 성공/실패 딥링크 URL 가로채기
-  const handleShouldStart = async (req) => {
-    const url = req?.url || "";
+  // ✅ 동기 함수: 반드시 boolean을 즉시 반환
+  const handleShouldStart = (req) => {
+    const url = req?.url ?? "";
+
     if (url.startsWith(SUCCESS_URL) || url.startsWith(FAIL_URL)) {
-      try {
-        if (url.startsWith(SUCCESS_URL)) {
-          Alert.alert("결제 완료", "결제가 성공적으로 완료되었습니다.");
-        } else {
-          Alert.alert("결제 실패", "결제가 취소되었거나 실패했습니다.");
-        }
-        // 공통 정리
-        if (currentOrderIdRef.current) {
-          try {
-            await api.post(`/api/orders/close-payment/${currentOrderIdRef.current}`);
-          } catch (e) {
-            console.warn("close-payment 실패:", e?.response?.data || e?.message);
-          }
-          currentOrderIdRef.current = null;
-          currentTxnIdRef.current = null;
-        }
-      } finally {
-        setShowWebView(false);
+      // 사용자 피드백
+      if (url.startsWith(SUCCESS_URL)) {
+        Alert.alert("결제 완료", "결제가 성공적으로 완료되었습니다.");
+      } else {
+        Alert.alert("결제 실패", "결제가 취소되었거나 실패했습니다.");
       }
-      return false; // WebView에서 해당 URL 로딩 막기
+
+      // 모달 닫기 & 레퍼런스 정리 (동기)
+      const orderId = currentOrderIdRef.current;
+      currentOrderIdRef.current = null;
+      setShowWebView(false);
+
+      // 서버 정리는 비동기로 뒤에서 처리 (fire-and-forget)
+      setTimeout(() => {
+        if (orderId) {
+          api.post(`/api/orders/close-payment/${orderId}`).catch((e) => {
+            console.warn("close-payment 실패:", e?.response?.data || e?.message);
+          });
+        }
+      }, 0);
+
+      return false; // ✅ WebView 로딩 막기 (반드시 boolean)
     }
-    return true; // 일반 URL은 통과
+
+    return true; // ✅ 그 외 URL은 계속 로딩
   };
+
 
   return (
     <>
@@ -295,6 +301,9 @@ export default function PayBottom({
           }
           onMessage={handleWebViewMessage}
           onShouldStartLoadWithRequest={handleShouldStart}
+          originWhitelist={['*']}
+          javaScriptEnabled
+          domStorageEnabled
           startInLoadingState
           renderLoading={() => <ActivityIndicator style={{ flex: 1 }} size="large" />}
         />
