@@ -98,7 +98,9 @@ export default function SellerLoginScreen() {
             setIsLoggedIn(true);
 
             // 6) 메인으로 이동 (필요 시 판매자 전용 홈으로 교체)
-            navigation.replace("Main");
+            navigation.replace("SellerMain", {storeName: storeName ?? sellerName ?? "매장 이름",
+                sellerId: sellerId ?? null,
+                sellerName: sellerName ?? null,});
         } catch (err) {
             console.warn("판매자 로그인 실패:", err);
             Alert.alert("로그인 실패", "이메일 또는 비밀번호를 확인해 주세요.");
