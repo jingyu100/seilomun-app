@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,11 @@ import {
 import { WebView } from "react-native-webview";
 import api from "../../../../api/api.js";
 
+const CLIENT_KEY = "test_ck_AQ92ymxN341KPlO15vDvVajRKXvd";
+const APP_SCHEME = "myapp"; // ✅ 필요시 변경
+const SUCCESS_URL = `${APP_SCHEME}://payment/success`;
+const FAIL_URL = `${APP_SCHEME}://payment/fail`;
+
 export default function PayBottom({
   products = [],
   deliveryFee = 0,
@@ -22,14 +27,17 @@ export default function PayBottom({
   pointsToUse = 0,
 }) {
   const [showWebView, setShowWebView] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState("");
+  const [paymentUrl, setPaymentUrl] = useState(""); // 서버가 주는 URL(있으면 사용)
+  const [paymentHtml, setPaymentHtml] = useState(""); // 서버 URL 없을 때 대체용 HTML
   const [loading, setLoading] = useState(false);
-  const currentOrderIdRef = useRef(null);
+  const webviewRef = useRef(null);
+  const currentOrderIdRef = useRef(null);     // 서버 주문 PK(정리용)
+  const currentTxnIdRef = useRef(null);       // Toss 결제용 orderId
 
   const calculatedFinalAmount =
     finalAmount || totalProductPrice + (isPickup ? 0 : deliveryFee);
 
-  // 1️⃣ 주문 데이터 유효성 검사
+  // 간단 유효성 검사
   const validateOrderData = () => {
     if (!isPickup) {
       if (!deliveryInfo.mainAddress?.trim()) {
@@ -45,29 +53,94 @@ export default function PayBottom({
         return false;
       }
     }
+    if (!products?.length) {
+      Alert.alert("안내", "주문할 상품이 없습니다.");
+      return false;
+    }
     return true;
   };
 
-  // 2️⃣ 결제 버튼 클릭
+  // RN ↔ WebView 통신을 위한 안전한 문자열 변환
+  const escapeHtml = (s = "") =>
+    String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  // 서버 URL이 없을 때 사용할 결제 HTML (토스 JS SDK 직접 호출)
+  const buildPaymentHTML = ({ clientKey, orderId, orderName, amount }) => {
+    const safeName = escapeHtml(orderName);
+    return `
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  />
+  <title>Toss Payment</title>
+  <script src="https://js.tosspayments.com/v1"></script>
+  <style>
+    html,body{margin:0;padding:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+    .wrap{display:flex;align-items:center;justify-content:center;height:100%}
+    .btn{padding:14px 20px;border-radius:8px;background:#000;color:#fff;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <button id="pay" class="btn">결제 진행</button>
+  </div>
+  <script>
+    (function(){
+      const clientKey='${clientKey}';
+      const tossPayments = TossPayments(clientKey);
+      const params = {
+        amount: ${Number(amount)},
+        orderId: '${orderId}',
+        orderName: '${safeName}',
+        customerName: '고객',
+        customerEmail: 'customer@example.com',
+        successUrl: '${SUCCESS_URL}',
+        failUrl: '${FAIL_URL}',
+      };
+
+      function go(){
+        tossPayments.requestPayment('CARD', params).catch(function(e){
+          // 유저 취소/파라미터 오류 등
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type:'ERROR', code: e.code || e.name, message: e.message }));
+          }
+        });
+      }
+
+      document.getElementById('pay').addEventListener('click', go);
+      // 자동 시작 원하면 아래 주석 해제
+      // go();
+    })();
+  </script>
+</body>
+</html>
+`;
+  };
+
+  // 결제 버튼
   const handlePaymentClick = async () => {
     try {
       if (!validateOrderData()) return;
-      if (!products || products.length === 0) {
-        Alert.alert("안내", "주문할 상품이 없습니다.");
-        return;
-      }
-
       setLoading(true);
 
-      const firstProduct = products[0];
+      const first = products[0];
       const orderName =
         products.length === 1
-          ? `${firstProduct.name} ${firstProduct.quantity || 1}개`
-          : `${firstProduct.name} 외 ${products.length - 1}건`;
+          ? `${first.name} ${first.quantity || 1}개`
+          : `${first.name} 외 ${products.length - 1}건`;
 
-      // 서버로 보낼 주문 데이터
+      // 1) 서버에 주문 생성
       const orderData = {
-        usedPoints: Number(pointsToUse),
+        usedPoints: Number(pointsToUse) || 0,
         memo: isPickup
           ? pickupInfo.pickupRequest || "픽업 주문"
           : deliveryInfo.deliveryRequest || "배송 주문",
@@ -76,66 +149,115 @@ export default function PayBottom({
           ? "매장 픽업"
           : `${deliveryInfo.mainAddress || ""} ${deliveryInfo.detailAddress || ""}`.trim(),
         orderProducts: products.map((p) => ({
-          productId: Number(p.id || p.productId),
+          productId: Number(p.id ?? p.productId),
           quantity: Number(p.quantity || 1),
-          price: Number(p.discountPrice || p.originalPrice),
+          price: Number(p.discountPrice ?? p.originalPrice),
           currentDiscountRate: Number(p.currentDiscountRate || 0),
         })),
         payType: "CARD",
         orderName,
+        amount: Number(calculatedFinalAmount),
       };
 
-      console.log("📦 서버로 보낼 주문 데이터:", orderData);
-
-      // 2-1️⃣ 서버 호출: 결제 URL 생성
-      const response = await api.post("/api/orders/pay/native", orderData, {
+      const resp = await api.post("/api/orders/buy", orderData, {
         headers: { "Content-Type": "application/json" },
       });
 
-      const { paymentUrl, orderId } = response.data?.data || {};
-      if (!paymentUrl || !orderId) {
-        throw new Error("서버에서 결제 URL을 받지 못했습니다.");
+      // 서버가 주는 형태 모두 대응
+      const data = resp.data?.data?.Update || resp.data?.data || {};
+      const realOrderId = data.orderId || data.id;                 // 서버 주문 PK
+      const txnId = data.transactionId || data.tossOrderId || realOrderId; // Toss 결제용 orderId
+      const amount = Number(data.amount ?? orderData.amount);
+      const name = data.orderName || orderData.orderName;
+
+      if (!realOrderId || !txnId || !amount) {
+        throw new Error("서버에서 orderId/transactionId/amount 값을 받지 못했습니다.");
       }
 
-      currentOrderIdRef.current = orderId;
-      setPaymentUrl(paymentUrl);
+      currentOrderIdRef.current = realOrderId;
+      currentTxnIdRef.current = String(txnId);
+
+      // 2-A) 서버가 결제 URL을 주는 경우 그대로 사용
+      if (data.paymentUrl) {
+        setPaymentUrl(String(data.paymentUrl));
+        setPaymentHtml("");
+        setShowWebView(true);
+        return;
+      }
+
+      // 2-B) 서버 URL이 없으면, 클라이언트 키로 HTML 생성해서 WebView 로드
+      const html = buildPaymentHTML({
+        clientKey: CLIENT_KEY,
+        orderId: String(txnId),
+        orderName: name,
+        amount,
+      });
+      setPaymentHtml(html);
+      setPaymentUrl("");
       setShowWebView(true);
     } catch (error) {
-      console.error("❌ 결제 처리 실패:", error.response?.data || error.message);
-      Alert.alert("결제 실패", error.message || "오류가 발생했습니다.");
+      console.error("❌ 결제 처리 실패:", error?.response?.data || error?.message);
+      Alert.alert("결제 실패", error?.message || "오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
-  // 3️⃣ WebView 메시지 수신
+  // WebView → RN 메시지
   const handleWebViewMessage = async (event) => {
-    const data = event.nativeEvent.data;
-    console.log("💬 WebView 메시지:", data);
-
-    if (!currentOrderIdRef.current) return;
-
     try {
-      if (data === "success") {
-        Alert.alert("결제 완료", "결제가 성공적으로 완료되었습니다.");
-      } else if (data === "fail" || data === "cancel") {
-        Alert.alert("결제 취소", "결제가 취소되었습니다.");
+      const msg = JSON.parse(event.nativeEvent.data || "{}");
+      if (msg?.type === "ERROR") {
+        if (msg.code === "USER_CANCEL") {
+          Alert.alert("안내", "사용자가 결제를 취소했습니다.");
+        } else {
+          Alert.alert("결제 실패", msg.message || "오류가 발생했습니다.");
+        }
+        // 취소/오류에도 서버 정리(선택)
+        if (currentOrderIdRef.current) {
+          try {
+            await api.post(`/api/orders/close-payment/${currentOrderIdRef.current}`);
+          } catch {}
+          currentOrderIdRef.current = null;
+          currentTxnIdRef.current = null;
+        }
+        setShowWebView(false);
       }
+    } catch {}
+  };
 
-      // 공통: 결제 종료 처리
-      await api.post(`/api/orders/close-payment/${currentOrderIdRef.current}`);
-      currentOrderIdRef.current = null;
-    } catch (err) {
-      console.error("❌ close-payment 처리 실패:", err);
-    } finally {
-      setShowWebView(false);
+  // 성공/실패 딥링크 URL 가로채기
+  const handleShouldStart = async (req) => {
+    const url = req?.url || "";
+    if (url.startsWith(SUCCESS_URL) || url.startsWith(FAIL_URL)) {
+      try {
+        if (url.startsWith(SUCCESS_URL)) {
+          Alert.alert("결제 완료", "결제가 성공적으로 완료되었습니다.");
+        } else {
+          Alert.alert("결제 실패", "결제가 취소되었거나 실패했습니다.");
+        }
+        // 공통 정리
+        if (currentOrderIdRef.current) {
+          try {
+            await api.post(`/api/orders/close-payment/${currentOrderIdRef.current}`);
+          } catch (e) {
+            console.warn("close-payment 실패:", e?.response?.data || e?.message);
+          }
+          currentOrderIdRef.current = null;
+          currentTxnIdRef.current = null;
+        }
+      } finally {
+        setShowWebView(false);
+      }
+      return false; // WebView에서 해당 URL 로딩 막기
     }
+    return true; // 일반 URL은 통과
   };
 
   return (
     <>
       <View style={styles.container}>
-        <View style={styles.summary}>
+        <View className="summary" style={styles.summary}>
           <Text style={styles.label}>총 결제 금액</Text>
           <Text style={styles.amount}>{calculatedFinalAmount.toLocaleString()}원</Text>
         </View>
@@ -153,16 +275,26 @@ export default function PayBottom({
             onPress={handlePaymentClick}
             disabled={loading}
           >
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#fff" }}>결제하기</Text>}
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={{ color: "#fff" }}>결제하기</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
 
       {/* WebView 모달 */}
-      <Modal visible={showWebView} animationType="slide">
+      <Modal visible={showWebView} animationType="slide" onRequestClose={() => setShowWebView(false)}>
         <WebView
-          source={{ uri: paymentUrl }}
+          ref={webviewRef}
+          source={
+            paymentUrl
+              ? { uri: paymentUrl }                 // 서버 제공 URL 그대로
+              : { html: paymentHtml, baseUrl: "https://localhost" } // 클라 생성 HTML
+          }
           onMessage={handleWebViewMessage}
+          onShouldStartLoadWithRequest={handleShouldStart}
           startInLoadingState
           renderLoading={() => <ActivityIndicator style={{ flex: 1 }} size="large" />}
         />
