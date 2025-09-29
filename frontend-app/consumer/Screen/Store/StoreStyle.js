@@ -19,14 +19,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     width: '100%',
-    height: 250,
+    height: 300, // 이미지 높이를 250에서 300으로 늘렸습니다.
     zIndex: -1,
   },
   storeUI: {
     position: 'relative',
     width: '100%',
     height: '100%',
-    paddingTop: 100,
+    paddingTop: 180, // 스크롤 시작 위치를 100에서 180으로 조정했습니다.
     zIndex: 100,
   },
   storeHead: {
@@ -92,30 +92,30 @@ const styles = StyleSheet.create({
 
   // 가게 메뉴, 정보, 리뷰 탭 부분
   tabUI: {
-      flexDirection: 'row',
-      position: 'relative',
-      borderBottomWidth: 1,
-      borderBottomColor: '#ccc',
+    flexDirection: 'row',
+    position: 'relative',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
   storeTabItem: {
-      flex: 1,
-      paddingVertical: 12,
-      alignItems: 'center',
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
   },
   tabText: {
-      fontSize: 16,
-      color: '#666',
+    fontSize: 16,
+    color: '#666',
   },
   activeTabText: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
   },
   underline: {
-      position: 'absolute',
-      bottom: 0,
-      height: 2,
-      backgroundColor: 'black',
+    position: 'absolute',
+    bottom: 0,
+    height: 2,
+    backgroundColor: 'black',
   },
   tabContent: {
     paddingTop: 16,

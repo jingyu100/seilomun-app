@@ -1,13 +1,14 @@
 import React, { useRef } from 'react';
-import { View, Text, Animated, Image, ScrollView, SafeAreaView, Alert } from 'react-native';
+import { View, Animated, Image, ScrollView, SafeAreaView, Alert, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import useStoreInfo from "../../../Hook/useStoreInfo.js";
 import styles from './StoreStyle.js';
-import Header from '../Header/Header.js';
 import BottomTab from '../BottomTab/BottomTab.js';
 import StoreHead from "./StoreComponents/StoreHead.js";
 import { useChatRooms } from "../../../Context/ChatRoomsContext";
 import useLogin from "../../../Hook/useLogin";
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function StoreScreen() {
 
@@ -15,6 +16,7 @@ export default function StoreScreen() {
     const navigation = useNavigation();
     const { user, isLoggedIn } = useLogin();
     const { chatRooms } = useChatRooms();
+    const insets = useSafeAreaInsets();
 
 
     const sellerInformationDto = store?.sellerInformationDto;
@@ -49,18 +51,15 @@ export default function StoreScreen() {
             return;
         }
 
-        // 판매자와의 기존 채팅방 확인
         const existingRoom = chatRooms.find(room => String(room.sellerId) === String(sellerId));
 
         if (existingRoom) {
-            // 기존 채팅방이 있으면 바로 이동
             navigation.navigate("CustomerChatting", {
                 chatRoomId: existingRoom.chatRoomId,
                 sellerId: existingRoom.sellerId,
                 sellerStoreName: existingRoom.sellerStoreName,
             });
         } else {
-            // 없으면, CustomerChatting 화면으로 이동하여 새로 생성
             navigation.navigate("CustomerChatting", {
                 sellerId: sellerId,
                 sellerStoreName: sellerInformationDto?.storeName || '상점',
@@ -68,9 +67,16 @@ export default function StoreScreen() {
         }
     };
 
+    const handleGoBack = () => {
+        if (navigation.canGoBack()) {
+            navigation.goBack();
+        } else {
+            navigation.navigate('Main');
+        }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
-            <Header />
             <Animated.Image
                 source={
                     storeImages && storeImages.length > 0
@@ -96,24 +102,59 @@ export default function StoreScreen() {
                     { useNativeDriver: false }
                 )}
                 scrollEventThrottle={16}
+                showsVerticalScrollIndicator={false}
             >
-                <View style={{ backgroundColor: '#fff', }}>
+                <View style={{ backgroundColor: '#fff', minHeight: '100%' }}>
                     <View style={styles.storeMargin}>
                         <StoreHead
-                            testID='storeHead'
                             store={store}
                             sellerId={sellerId}
                             onOpenChat={handleOpenChat}
                         />
-
-                        <View testID="storeBdoy">
+                        <View>
                             {/* 여기에 리뷰, 기타 내용이 추가되면 다 보여짐 */}
-
                         </View>
                     </View>
                 </View>
             </Animated.ScrollView>
+
+            {/* 투명 헤더와 아이콘 */}
+            <View style={[headerStyles.header, { paddingTop: insets.top, paddingBottom: 10 }]}>
+                <TouchableOpacity onPress={handleGoBack} style={headerStyles.iconContainer}>
+                    <Ionicons name="arrow-back" size={28} color="white" />
+                </TouchableOpacity>
+                <View style={headerStyles.rightIcons}>
+                    <TouchableOpacity style={headerStyles.iconContainer}>
+                        <Ionicons name="notifications-outline" size={24} color="white" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={headerStyles.iconContainer}>
+                        <Ionicons name="cart-outline" size={24} color="white" />
+                    </TouchableOpacity>
+                </View>
+            </View>
+
             <BottomTab />
         </SafeAreaView>
     )
 }
+
+const headerStyles = StyleSheet.create({
+    header: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'transparent',
+        zIndex: 1000,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 15,
+    },
+    iconContainer: {
+        padding: 5,
+    },
+    rightIcons: {
+        flexDirection: 'row',
+    }
+});
