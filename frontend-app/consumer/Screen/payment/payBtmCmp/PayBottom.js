@@ -10,11 +10,13 @@ import {
   Platform,
   Linking,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { WebView } from "react-native-webview";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import api from "../../../../api/api.js";
 
 const CLIENT_KEY = "test_ck_AQ92ymxN341KPlO15vDvVajRKXvd";
-const APP_SCHEME = "myapp"; // iOS/Android URL scheme 등록 필요(Info.plist/AndroidManifest)
+const APP_SCHEME = "myapp";
 const SUCCESS_URL = `${APP_SCHEME}://payment/success`;
 const FAIL_URL = `${APP_SCHEME}://payment/fail`;
 
@@ -29,18 +31,26 @@ export default function PayBottom({
   pointsToUse = 0,
 }) {
   const [showWebView, setShowWebView] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState(""); // 서버가 주면 그대로 사용
-  const [paymentHtml, setPaymentHtml] = useState(""); // 서버 URL 없으면 클라에서 생성
+  const [paymentUrl, setPaymentUrl] = useState("");
+  const [paymentHtml, setPaymentHtml] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const navigation = useNavigation();
   const webviewRef = useRef(null);
-  const currentOrderIdRef = useRef(null); // 서버 주문 PK(정리용)
-  const currentTxnIdRef = useRef(null);   // Toss 결제용 orderId
+  const currentOrderIdRef = useRef(null);
+  const currentTxnIdRef = useRef(null);
+  const insets = useSafeAreaInsets(); // ✅ 안전영역
 
   const calculatedFinalAmount =
     finalAmount || totalProductPrice + (isPickup ? 0 : deliveryFee);
 
-  // 간단 유효성
+  const goHome = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Main" }],
+    });
+  };
+
   const validateOrderData = () => {
     if (!isPickup) {
       if (!deliveryInfo.mainAddress?.trim()) {
@@ -63,7 +73,6 @@ export default function PayBottom({
     return true;
   };
 
-  // HTML 인젝션 대비
   const escapeHtml = (s = "") =>
     String(s)
       .replace(/&/g, "&amp;")
@@ -72,60 +81,43 @@ export default function PayBottom({
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
 
-  // 서버 URL 없을 때 사용할 결제 HTML (Toss JS SDK)
   const buildPaymentHTML = ({ clientKey, orderId, orderName, amount }) => {
     const safeName = escapeHtml(orderName);
-    return `
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-  <title>Toss Payment</title>
-  <script src="https://js.tosspayments.com/v1"></script>
-  <style>
-    html,body{margin:0;padding:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto}
-    .wrap{display:flex;align-items:center;justify-content:center;height:100%}
-    .btn{padding:14px 20px;border-radius:8px;background:#000;color:#fff;font-weight:600}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <button id="pay" class="btn">결제 진행</button>
-  </div>
-  <script>
-    (function(){
-      const tossPayments = TossPayments('${clientKey}');
-      const params = {
-        amount: ${Number(amount)},
-        orderId: '${orderId}',
-        orderName: '${safeName}',
-        customerName: '고객',
-        customerEmail: 'customer@example.com',
-        successUrl: '${SUCCESS_URL}',
-        failUrl: '${FAIL_URL}',
-      };
-      function go(){
-        tossPayments.requestPayment('CARD', params).catch(function(e){
-          if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({
-              type:'ERROR',
-              code: e.code || e.name,
-              message: e.message
-            }));
-          }
-        });
-      }
-      document.getElementById('pay').addEventListener('click', go);
-      // 자동 실행 원하면 아래 주석 해제
-      // go();
-    })();
-  </script>
-</body>
-</html>`;
+    return `<!doctype html><html lang="ko"><head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+      <title>Toss Payment</title>
+      <script src="https://js.tosspayments.com/v1"></script>
+      <style>html,body{margin:0;padding:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+      .wrap{display:flex;align-items:center;justify-content:center;height:100%}
+      .btn{padding:14px 20px;border-radius:8px;background:#00c266;color:#fff;font-weight:600}</style>
+    </head><body>
+      <div class="wrap"><button id="pay" class="btn">결제 진행</button></div>
+      <script>(function(){
+        const tossPayments = TossPayments('${clientKey}');
+        const params = {
+          amount:${Number(amount)},
+          orderId:'${orderId}',
+          orderName:'${safeName}',
+          customerName:'고객',
+          customerEmail:'customer@example.com',
+          successUrl:'${SUCCESS_URL}',
+          failUrl:'${FAIL_URL}',
+        };
+        function go(){
+          tossPayments.requestPayment('CARD', params).catch(function(e){
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type:'ERROR', code:e.code||e.name, message:e.message
+              }));
+            }
+          });
+        }
+        document.getElementById('pay').addEventListener('click', go);
+      })();</script>
+    </body></html>`;
   };
 
-  // 결제 버튼
   const handlePaymentClick = async () => {
     try {
       if (!validateOrderData()) return;
@@ -137,7 +129,6 @@ export default function PayBottom({
           ? `${first.name} ${first.quantity || 1}개`
           : `${first.name} 외 ${products.length - 1}건`;
 
-      // 1) 서버 주문 생성
       const orderData = {
         usedPoints: Number(pointsToUse) || 0,
         memo: isPickup
@@ -146,7 +137,9 @@ export default function PayBottom({
         isDelivery: isPickup ? "N" : "Y",
         deliveryAddress: isPickup
           ? "매장 픽업"
-          : `${deliveryInfo.mainAddress || ""} ${deliveryInfo.detailAddress || ""}`.trim(),
+          : `${deliveryInfo.mainAddress || ""} ${
+              deliveryInfo.detailAddress || ""
+            }`.trim(),
         orderProducts: products.map((p) => ({
           productId: Number(p.id ?? p.productId),
           quantity: Number(p.quantity || 1),
@@ -162,21 +155,17 @@ export default function PayBottom({
         headers: { "Content-Type": "application/json" },
       });
 
-      // 서버 응답 다양한 형태 대응
       const data = resp.data?.data?.Update || resp.data?.data || {};
-      const realOrderId = data.orderId || data.id; // 서버 주문 PK
-      const txnId = data.transactionId || data.tossOrderId || realOrderId; // Toss 결제용 orderId
+      const realOrderId = data.orderId || data.id;
+      const txnId = data.transactionId || data.tossOrderId || realOrderId;
       const amount = Number(data.amount ?? orderData.amount);
       const name = data.orderName || orderData.orderName;
-
-      if (!realOrderId || !txnId || !amount) {
+      if (!realOrderId || !txnId || !amount)
         throw new Error("서버에서 orderId/transactionId/amount 값을 받지 못했습니다.");
-      }
 
       currentOrderIdRef.current = realOrderId;
       currentTxnIdRef.current = String(txnId);
 
-      // 2-A) 서버가 결제 URL을 주는 경우
       if (data.paymentUrl) {
         setPaymentUrl(String(data.paymentUrl));
         setPaymentHtml("");
@@ -184,7 +173,6 @@ export default function PayBottom({
         return;
       }
 
-      // 2-B) 서버 URL이 없으면 클라에서 HTML 생성
       const html = buildPaymentHTML({
         clientKey: CLIENT_KEY,
         orderId: String(txnId),
@@ -202,7 +190,6 @@ export default function PayBottom({
     }
   };
 
-  // WebView → RN 메시지
   const handleWebViewMessage = (event) => {
     try {
       const msg = JSON.parse(event.nativeEvent.data || "{}");
@@ -212,59 +199,51 @@ export default function PayBottom({
         } else {
           Alert.alert("결제 실패", msg.message || "오류가 발생했습니다.");
         }
-        // 취소/오류에도 서버 정리(선택)
         const orderId = currentOrderIdRef.current;
         currentOrderIdRef.current = null;
         currentTxnIdRef.current = null;
         setShowWebView(false);
-        if (orderId) {
+        if (orderId)
           setTimeout(() => {
             api.post(`/api/orders/close-payment/${orderId}`).catch(() => {});
           }, 0);
-        }
       }
     } catch {}
   };
 
-  // ✅ 반드시 동기 반환(Boolean). 외부 스킴/딥링크/마켓 처리 포함.
   const handleShouldStart = (req) => {
     const url = req?.url ?? "";
 
-    // 0) 토스 앱 스킴 직접 열기
     if (url.startsWith("supertoss://")) {
       Linking.openURL(url).catch(() => {});
       return false;
     }
 
-    // 1) intent 스킴 → 앱 스킴 변환 후 열기, 미설치 시 마켓
     if (url.startsWith("intent://")) {
       try {
-        const scheme = (url.match(/#Intent;scheme=([^;]+);/) || [])[1]; // 예: supertoss
-        const path = url.replace("intent://", "").split("#Intent;")[0]; // 예: pay?payToken=...
-        const appUrl = `${scheme}://${path}`; // supertoss://pay?payToken=...
-
+        const scheme = (url.match(/#Intent;scheme=([^;]+);/) || [])[1];
+        const path = url.replace("intent://", "").split("#Intent;")[0];
+        const appUrl = `${scheme}://${path}`;
         Linking.openURL(appUrl).catch(() => {
-          const pkg = (url.match(/;package=([^;]+);/) || [])[1]; // viva.republica.toss
+          const pkg = (url.match(/;package=([^;]+);/) || [])[1];
           if (pkg && Platform.OS === "android") {
             const market = `market://details?id=${pkg}`;
             Linking.openURL(market).catch(() => {
-              Linking.openURL(`https://play.google.com/store/apps/details?id=${pkg}`).catch(() => {});
+              Linking.openURL(
+                `https://play.google.com/store/apps/details?id=${pkg}`
+              ).catch(() => {});
             });
           }
         });
-      } catch {
-        // 파싱 실패해도 WebView 로딩 막기
-      }
+      } catch {}
       return false;
     }
 
-    // 2) 마켓 스킴 처리
     if (url.startsWith("market://")) {
       Linking.openURL(url).catch(() => {});
       return false;
     }
 
-    // 3) 성공/실패 딥링크 처리
     if (url.startsWith(SUCCESS_URL) || url.startsWith(FAIL_URL)) {
       const orderId = currentOrderIdRef.current;
       currentOrderIdRef.current = null;
@@ -272,7 +251,9 @@ export default function PayBottom({
 
       setTimeout(() => {
         if (url.startsWith(SUCCESS_URL)) {
-          Alert.alert("결제 완료", "결제가 성공적으로 완료되었습니다.");
+          Alert.alert("결제 완료", "결제가 성공적으로 완료되었습니다.", [
+            { text: "확인", onPress: goHome },
+          ]);
         } else {
           Alert.alert("결제 실패", "결제가 취소되었거나 실패했습니다.");
         }
@@ -284,16 +265,22 @@ export default function PayBottom({
       return false;
     }
 
-    // 그 외는 그대로 로드
     return true;
   };
 
   return (
     <>
-      <View style={styles.container}>
+      <View
+        style={[
+          styles.container,
+          { paddingBottom: Math.max(insets.bottom, 8) }, // ✅ 안전영역 보정
+        ]}
+      >
         <View style={styles.summary}>
           <Text style={styles.label}>총 결제 금액</Text>
-          <Text style={styles.amount}>{calculatedFinalAmount.toLocaleString()}원</Text>
+          <Text style={styles.amount}>
+            {calculatedFinalAmount.toLocaleString()}원
+          </Text>
         </View>
 
         <View style={styles.buttons}>
@@ -318,35 +305,53 @@ export default function PayBottom({
         </View>
       </View>
 
-      {/* WebView 모달 */}
       <Modal
         visible={showWebView}
         animationType="slide"
         onRequestClose={() => setShowWebView(false)}
       >
-        <WebView
-          ref={webviewRef}
-          source={
-            paymentUrl
-              ? { uri: paymentUrl } // 서버 제공 URL
-              : { html: paymentHtml, baseUrl: "https://localhost" } // 클라 생성 HTML
-          }
-          onMessage={handleWebViewMessage}
-          onShouldStartLoadWithRequest={handleShouldStart}
-          originWhitelist={["*"]}
-          javaScriptEnabled
-          domStorageEnabled
-          startInLoadingState
-          renderLoading={() => <ActivityIndicator style={{ flex: 1 }} size="large" />}
-        />
+        <View
+          style={{
+            flex: 1,
+            paddingTop: insets.top,
+            paddingBottom: insets.bottom,
+            backgroundColor: "#fff",
+          }}
+        >
+          <WebView
+            ref={webviewRef}
+            source={
+              paymentUrl
+                ? { uri: paymentUrl }
+                : { html: paymentHtml, baseUrl: "https://localhost" }
+            }
+            onMessage={handleWebViewMessage}
+            onShouldStartLoadWithRequest={handleShouldStart}
+            originWhitelist={["*"]}
+            javaScriptEnabled
+            domStorageEnabled
+            startInLoadingState
+            renderLoading={() => (
+              <ActivityIndicator style={{ flex: 1 }} size="large" />
+            )}
+          />
+        </View>
       </Modal>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, backgroundColor: "#fff" },
-  summary: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  container: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    backgroundColor: "#fff",
+  },
+  summary: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
   label: { fontSize: 16 },
   amount: { fontSize: 18, fontWeight: "bold" },
   buttons: { flexDirection: "row", justifyContent: "space-between" },
