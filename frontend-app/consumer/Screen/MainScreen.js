@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, ScrollView, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import api from "../../api/api.js";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,11 +15,13 @@ import Header from "../Screen/Header/Header";
 import BottomTab from "../Screen/BottomTab/BottomTab";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useLogin from "../../Hook/useLogin";
+import { useNavigation } from "@react-navigation/native";
 
 export default function MainScreen() {
   const [products, setProducts] = useState([]);
   const [latestProducts, setLatestProducts] = useState([]);
   const { user, isLoggedIn, isLoading } = useLogin();
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchExpiringProducts = async () => {
@@ -61,6 +71,16 @@ export default function MainScreen() {
     return url.startsWith("http")
       ? url
       : `https://seilomun-bucket.s3.ap-northeast-2.amazonaws.com/${url}`;
+  };
+
+  // 상품을 클릭했을 때 해당 매장으로 이동하는 함수
+  const handleProductPress = (product) => {
+    console.log("상품 클릭:", product);
+    if (product.sellerId) {
+      navigation.navigate("Store", { sellerId: product.sellerId });
+    } else {
+      console.warn("sellerId가 없는 상품:", product);
+    }
   };
 
   const categories = [
@@ -114,7 +134,11 @@ export default function MainScreen() {
         >
           <View style={{ flexDirection: "row" }}>
             {products.map((product) => (
-              <View key={product.id} style={styles.productBox}>
+              <TouchableOpacity
+                key={product.id}
+                style={styles.productBox}
+                onPress={() => handleProductPress(product)}
+              >
                 <View
                   style={{
                     width: 100,
@@ -171,7 +195,7 @@ export default function MainScreen() {
                 </View>
 
                 <Text style={{ fontSize: 11, color: "#777" }}>{product.expiryDate}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
@@ -185,7 +209,11 @@ export default function MainScreen() {
         >
           <View style={{ flexDirection: "row" }}>
             {latestProducts.map((product) => (
-              <View key={product.id} style={styles.productBox}>
+              <TouchableOpacity
+                key={product.id}
+                style={styles.productBox}
+                onPress={() => handleProductPress(product)}
+              >
                 <View
                   style={{
                     width: 100,
@@ -242,7 +270,7 @@ export default function MainScreen() {
                 </View>
 
                 <Text style={{ fontSize: 11, color: "#777" }}>{product.expiryDate}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
